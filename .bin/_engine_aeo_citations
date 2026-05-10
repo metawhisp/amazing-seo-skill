@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 # Internal engine wrapper. Do not invoke directly; use tools/* instead.
-# Underlying engine: live LLM citation checker (Anthropic, OpenAI, Perplexity).
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-exec "$SKILL_DIR/.venv/bin/searchstack" "$@"
+[ -f "$SKILL_DIR/.bin/.engines.env" ] && source "$SKILL_DIR/.bin/.engines.env"
+
+ENGINE="${AMAZING_SEO_AEO_CITATIONS_ENGINE:-}"
+if [ -z "$ENGINE" ] || [ ! -x "$ENGINE" ]; then
+  echo "ERROR: AEO citations engine not configured. Run ./install.sh first." >&2
+  exit 1
+fi
+exec "$ENGINE" "$@"

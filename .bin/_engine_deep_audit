@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
 # Internal engine wrapper. Do not invoke directly; use tools/* instead.
-# Underlying engine: 251-rule deterministic SEO audit + Core Web Vitals via Playwright.
-exec /Users/android/.hermes/node/bin/seomator "$@"
+SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+[ -f "$SKILL_DIR/.bin/.engines.env" ] && source "$SKILL_DIR/.bin/.engines.env"
+
+ENGINE="${AMAZING_SEO_DEEP_AUDIT_ENGINE:-}"
+if [ -z "$ENGINE" ] || [ ! -x "$ENGINE" ]; then
+  echo "ERROR: deep-audit engine not configured. Run ./install.sh first." >&2
+  exit 1
+fi
+exec "$ENGINE" "$@"
