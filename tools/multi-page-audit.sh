@@ -54,8 +54,9 @@ if grep -q "<sitemap>" "$OUT/sitemap.xml"; then
 fi
 
 # Sample URLs: take first $LIMIT (deterministic — caller can shuffle externally if needed)
+# Two separate substitutions: macOS sed BRE doesn't support `\?` reliably.
 grep -oE "<loc>[^<]+</loc>" "$OUT/sitemap.xml" \
-  | sed 's|</\?loc>||g' \
+  | sed -e 's|<loc>||' -e 's|</loc>||' \
   | head -"$LIMIT" > "$OUT/sample.txt"
 
 SAMPLE_COUNT=$(wc -l < "$OUT/sample.txt" | tr -d ' ')
