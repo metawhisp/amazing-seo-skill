@@ -6,6 +6,15 @@ set -e
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SKILL_DIR"
 
+# ──────────────────────────────────────────────────────────────────────────────
+# Engine package identifiers (configuration only — not endorsement / attribution)
+# Override via env vars if you want to swap engines without editing this file.
+# ──────────────────────────────────────────────────────────────────────────────
+: "${DEEP_AUDIT_ENGINE_PKG:=@seomator/seo-audit}"
+: "${DEEP_AUDIT_ENGINE_BIN_NAME:=seomator}"
+: "${AEO_CITATIONS_ENGINE_PKG_GIT:=git+https://github.com/alexpospekhov/searchstack-aeo.git}"
+: "${AEO_CITATIONS_ENGINE_BIN_NAME:=searchstack}"
+
 echo "==> Checking prerequisites"
 for cmd in python3 npm git; do
   if ! command -v "$cmd" >/dev/null 2>&1; then
@@ -30,35 +39,29 @@ echo "==> Installing direct Python dependencies"
 .venv/bin/pip install --quiet -r requirements.txt
 
 echo ""
-echo "==> Installing AEO citation engine (Python)"
-.venv/bin/pip install --quiet \
-  git+https://github.com/alexpospekhov/searchstack-aeo.git
+echo "==> Installing AEO citation engine"
+.venv/bin/pip install --quiet "$AEO_CITATIONS_ENGINE_PKG_GIT"
 
 echo ""
 echo "==> Installing Playwright browser (Chromium, ~170MB)"
 .venv/bin/playwright install chromium
 
 echo ""
-echo "==> Installing deep-audit engine (Node)"
-npm install -g @seomator/seo-audit
+echo "==> Installing deep-audit engine"
+npm install -g "$DEEP_AUDIT_ENGINE_PKG"
 
 echo ""
-echo "==> Resolving engine paths"
-DEEP_AUDIT_BIN=$(command -v seomator || echo "")
-AEO_CITATIONS_BIN="$SKILL_DIR/.venv/bin/searchstack"
+echo "==> Resolving engine binary paths"
+DEEP_AUDIT_BIN=$(command -v "$DEEP_AUDIT_ENGINE_BIN_NAME" || echo "")
+AEO_CITATIONS_BIN="$SKILL_DIR/.venv/bin/$AEO_CITATIONS_ENGINE_BIN_NAME"
 
 if [ -z "$DEEP_AUDIT_BIN" ]; then
-  # npm prefix may not be on PATH; probe known location
   NPM_PREFIX=$(npm config get prefix)
-  DEEP_AUDIT_BIN="$NPM_PREFIX/bin/seomator"
+  DEEP_AUDIT_BIN="$NPM_PREFIX/bin/$DEEP_AUDIT_ENGINE_BIN_NAME"
 fi
 
-if [ ! -x "$DEEP_AUDIT_BIN" ]; then
-  echo "WARNING: deep-audit engine not found after install" >&2
-fi
-if [ ! -x "$AEO_CITATIONS_BIN" ]; then
-  echo "WARNING: AEO citation engine not found after install" >&2
-fi
+[ -x "$DEEP_AUDIT_BIN" ]    || echo "WARNING: deep-audit engine not found after install" >&2
+[ -x "$AEO_CITATIONS_BIN" ] || echo "WARNING: AEO citation engine not found after install" >&2
 
 echo ""
 echo "==> Writing engine config to .bin/.engines.env"
@@ -71,12 +74,12 @@ EOF
 echo ""
 echo "==> Verifying"
 "$DEEP_AUDIT_BIN" --version 2>&1 | head -1 || echo "  deep-audit: NOT WORKING"
-"$AEO_CITATIONS_BIN" 2>&1 | head -1 || echo "  AEO citations: NOT WORKING (config needed)"
+"$AEO_CITATIONS_BIN" 2>&1 | head -1         || echo "  AEO citations: NOT WORKING (needs .searchstack.toml)"
 .venv/bin/python -c 'from playwright.sync_api import sync_playwright; print("  playwright: OK")'
 
 echo ""
 echo "==> Done. For multi-LLM ensemble, store API keys in macOS Keychain:"
-echo '    security add-generic-password -s anthropic-api-key   -a $USER -w'
-echo '    security add-generic-password -s openai-api-key      -a $USER -w'
-echo '    security add-generic-password -s perplexity-api-key  -a $USER -w'
-echo '    security add-generic-password -s x.ai-api-key        -a $USER -w'
+echo '    security add-generic-password -s anthropic-api-key  -a $USER -w'
+echo '    security add-generic-password -s openai-api-key     -a $USER -w'
+echo '    security add-generic-password -s perplexity-api-key -a $USER -w'
+echo '    security add-generic-password -s x.ai-api-key       -a $USER -w'
