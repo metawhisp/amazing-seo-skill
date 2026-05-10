@@ -28,6 +28,30 @@ description: >
   - Invalid date formats
 - Flag deprecated types (see below)
 
+### Required + recommended fields (always run)
+
+Whenever auditing a page that contains JSON-LD, run:
+
+```
+scripts/schema_recommended_fields.py <url>
+```
+
+This deterministic check reports, **per schema item**:
+- which **required** fields are present / missing (rich-result eligibility)
+- which **recommended** fields are present / missing (completeness)
+- a per-item completeness score (0-100)
+
+Output is JSON with one entry per top-level item (including those nested in
+`@graph` or `mainEntity`). Always surface in the final report:
+- Any item with missing required fields → P0 (rich results blocked)
+- Items below 50% completeness → P1 (add the listed recommended fields)
+- For BlogPosting/Article specifically, always check `datePublished` AND
+  `dateModified` — `datePublished` is required, `dateModified` is recommended
+  and signals content freshness for re-indexing
+
+This complements `_engine_deep_audit`, which reports counts but not the
+specific field names. Always run both and merge findings.
+
 ## Schema Type Status (as of Feb 2026)
 
 Read `references/schema-types.md` for the full list. Key rules:
