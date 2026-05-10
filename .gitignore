@@ -1,0 +1,39 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.pytest_cache/
+
+# Playwright
+.playwright/
+ms-playwright/
+
+# Node
+node_modules/
+
+# Local data / private fixtures
+tests/private-fixtures/
+data/
+*.sqlite
+*.sqlite3
+*.db
+
+# Reports / outputs (run-time artefacts)
+reports/
+output/
+*.log
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Env files (keys are in macOS Keychain, not env files — but keep guard)
+.env
+.env.*
+!.env.example

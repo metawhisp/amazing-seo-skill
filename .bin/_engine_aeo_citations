@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Internal engine wrapper. Do not invoke directly; use tools/* instead.
+# Underlying engine: live LLM citation checker (Anthropic, OpenAI, Perplexity).
+SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+exec "$SKILL_DIR/.venv/bin/searchstack" "$@"

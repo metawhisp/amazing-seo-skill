@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Internal engine wrapper. Do not invoke directly; use tools/* instead.
+# Underlying engine: 251-rule deterministic SEO audit + Core Web Vitals via Playwright.
+exec /Users/android/.hermes/node/bin/seomator "$@"
