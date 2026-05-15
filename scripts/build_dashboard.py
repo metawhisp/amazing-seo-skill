@@ -53,92 +53,179 @@ def _db_path() -> Path:
 
 
 _CSS = """
+/* amazing-seo-skill dashboard — terminal minimal */
 :root {
-  --bg: #0f1419; --fg: #e6e6e6; --muted: #8a8a8a; --card: #1a1f2e;
-  --border: #2a3142; --accent: #4a9eff;
-  --green: #4ade80; --yellow: #facc15; --red: #f87171; --orange: #fb923c;
-  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+  --bg:       #0a0a0a;
+  --bg-alt:   #111111;
+  --fg:       #e4e4e4;
+  --fg-dim:   #888;
+  --muted:    #555;
+  --border:   #1c1c1c;
+  --border-hi:#2a2a2a;
+  --accent:   #00d4aa;   /* mint — single accent, used sparingly */
+  --good:     #00d4aa;
+  --warn:     #ffb800;
+  --bad:      #ff4757;
+  --mono: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', ui-monospace, Menlo, monospace;
 }
 * { box-sizing: border-box; }
+html { background: var(--bg); }
 body {
-  margin: 0; padding: 2rem; background: var(--bg); color: var(--fg);
-  font-family: var(--font); line-height: 1.5; font-size: 15px;
-  max-width: 1200px; margin: 0 auto;
+  margin: 0 auto; padding: 2.5rem 2rem; background: var(--bg); color: var(--fg);
+  font-family: var(--mono); font-size: 13px; line-height: 1.6;
+  letter-spacing: 0.01em; max-width: 1100px;
+  font-feature-settings: "ss01", "cv02";
+  -webkit-font-smoothing: antialiased;
 }
 a { color: var(--accent); text-decoration: none; }
-a:hover { text-decoration: underline; }
-header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
-h1 { margin: 0 0 0.5rem 0; font-weight: 600; font-size: 1.8rem; }
-h2 { margin-top: 2.5rem; margin-bottom: 1rem; font-size: 1.25rem;
-     border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; font-weight: 600; }
-h3 { margin-top: 1.5rem; margin-bottom: 0.75rem; font-size: 1.05rem; }
-.muted { color: var(--muted); font-size: 0.875rem; }
-.url { font-family: var(--mono); color: var(--accent); word-break: break-all; }
+a:hover { color: var(--fg); }
 
+/* Header — section banner */
+header {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem; margin-bottom: 2rem;
+}
+header .crumb {
+  color: var(--muted); font-size: 12px; margin-bottom: 0.6rem;
+  letter-spacing: 0.04em;
+}
+header .crumb a { color: var(--fg-dim); }
+header .crumb a:hover { color: var(--accent); }
+header h1 {
+  margin: 0 0 0.3rem 0; font-weight: 500; font-size: 18px;
+  letter-spacing: 0.02em;
+}
+header .url { color: var(--fg-dim); font-size: 12px; word-break: break-all; }
+header .meta { color: var(--muted); font-size: 11px; margin-top: 0.5rem; letter-spacing: 0.05em; text-transform: uppercase; }
+
+/* Section markers — ASCII style */
+h2 {
+  margin: 2.5rem 0 1rem 0;
+  font-weight: 500; font-size: 12px;
+  color: var(--fg-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+h2::before { content: "» "; color: var(--accent); }
+h3 {
+  margin-top: 1.25rem; margin-bottom: 0.5rem; font-size: 12px; font-weight: 500;
+  color: var(--fg-dim); text-transform: uppercase; letter-spacing: 0.1em;
+}
+.muted { color: var(--muted); font-size: 12px; }
+.url { color: var(--fg-dim); }
+
+/* Domain cards — list rows, not boxes */
 .cards {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem; margin-bottom: 1.5rem;
+  display: flex; flex-direction: column;
+  border-top: 1px solid var(--border);
 }
 .card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 10px; padding: 1rem 1.25rem;
+  display: grid;
+  grid-template-columns: 1fr auto 140px 100px;
+  align-items: center; gap: 1.5rem;
+  padding: 0.9rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--fg);
 }
-.card h3 { margin: 0 0 0.5rem 0; font-size: 1rem; }
-.card .score { font-size: 2.5rem; font-weight: 700; line-height: 1; }
-.card .meta { color: var(--muted); font-size: 0.85rem; margin-top: 0.5rem; }
-.card .sparkline { margin-top: 0.5rem; }
+.card:hover { background: var(--bg-alt); }
+.card .domain-name { font-size: 14px; font-weight: 500; }
+.card .score { font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums; text-align: right; }
+.card .sparkline { display: flex; align-items: center; }
+.card .meta { font-size: 11px; color: var(--muted); letter-spacing: 0.05em; text-align: right; }
 
-table { width: 100%; border-collapse: collapse; margin: 1rem 0;
-        background: var(--card); border: 1px solid var(--border); border-radius: 8px;
-        overflow: hidden; }
-th { background: rgba(255,255,255,0.04); text-align: left;
-     padding: 0.6rem 0.9rem; font-weight: 600; font-size: 0.85rem;
-     color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;
-     border-bottom: 1px solid var(--border); }
-td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+table {
+  width: 100%; border-collapse: collapse; margin: 0.5rem 0 1rem;
+  font-size: 12px;
+}
+th {
+  text-align: left; padding: 0.5rem 0.8rem 0.5rem 0;
+  font-weight: 500; font-size: 10px;
+  color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 0.55rem 0.8rem 0.55rem 0; border-bottom: 1px solid var(--border);
+  vertical-align: top; font-variant-numeric: tabular-nums;
+}
 tr:last-child td { border-bottom: none; }
-tr:hover td { background: rgba(255,255,255,0.03); }
+tr:hover td { background: var(--bg-alt); }
 
-.score-good { color: var(--green); }
-.score-warn { color: var(--yellow); }
-.score-bad  { color: var(--red); }
+.score-good { color: var(--good); }
+.score-warn { color: var(--warn); }
+.score-bad  { color: var(--bad); }
 
-.delta-up   { color: var(--green); }
-.delta-down { color: var(--red); }
+.delta-up   { color: var(--good); }
+.delta-down { color: var(--bad); }
 .delta-flat { color: var(--muted); }
 
-.badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px;
-         font-family: var(--mono); font-size: 0.75rem; font-weight: 600; }
-.badge-p0 { background: rgba(248,113,113,0.15); color: var(--red); }
-.badge-p1 { background: rgba(251,146,60,0.15); color: var(--orange); }
-.badge-p2 { background: rgba(250,204,21,0.12); color: var(--yellow); }
+/* Severity tokens — terminal label style */
+.badge {
+  display: inline-block; padding: 0.05rem 0.4rem;
+  font-family: var(--mono); font-size: 10px; font-weight: 500;
+  letter-spacing: 0.1em; border: 1px solid currentColor;
+}
+.badge-p0 { color: var(--bad); }
+.badge-p1 { color: var(--warn); }
+.badge-p2 { color: var(--fg-dim); }
 
-.sev-p0 { background: rgba(248,113,113,0.08); border-left: 3px solid var(--red); }
-.sev-p1 { background: rgba(251,146,60,0.06); border-left: 3px solid var(--orange); }
-.sev-p2 { background: rgba(250,204,21,0.04); border-left: 3px solid var(--yellow); }
+.sev-p0 td:first-child { border-left: 2px solid var(--bad); padding-left: 0.6rem; }
+.sev-p1 td:first-child { border-left: 2px solid var(--warn); padding-left: 0.6rem; }
+.sev-p2 td:first-child { border-left: 2px solid var(--muted); padding-left: 0.6rem; }
 
+/* Big status panel */
 .score-card {
-  display: flex; gap: 2rem; align-items: center;
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 2rem;
+  display: grid; grid-template-columns: auto 1fr;
+  gap: 2rem; align-items: center;
+  border: 1px solid var(--border); padding: 1.25rem 1.5rem;
+  margin-bottom: 2rem;
 }
-.score-gauge { font-size: 4rem; font-weight: 700; line-height: 1; }
-.score-detail { flex: 1; }
+.score-gauge {
+  font-size: 56px; font-weight: 400; line-height: 1;
+  font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+}
+.score-detail { font-size: 12px; }
+.score-detail .label {
+  color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.12em; font-size: 10px; margin-bottom: 0.2rem;
+}
+.score-detail p { margin: 0.2rem 0; }
 
+/* Category grid */
 .cat-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 0.75rem; margin-bottom: 1.5rem;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.5rem; margin-bottom: 1.5rem;
 }
-.cat-card { background: var(--card); border: 1px solid var(--border);
-            border-radius: 8px; padding: 0.75rem 1rem; }
-.cat-name { color: var(--muted); font-size: 0.85rem; text-transform: uppercase;
-            letter-spacing: 0.5px; }
-.cat-score { font-size: 1.5rem; font-weight: 600; margin: 0.25rem 0; }
-.cat-checkers { font-size: 0.8rem; color: var(--muted); }
+.cat-card {
+  border: 1px solid var(--border); padding: 0.7rem 0.9rem;
+}
+.cat-name {
+  color: var(--muted); font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.12em;
+}
+.cat-score {
+  font-size: 22px; font-weight: 400; margin: 0.2rem 0;
+  font-variant-numeric: tabular-nums;
+}
+.cat-checkers { font-size: 11px; color: var(--fg-dim); }
 
-footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border);
-         color: var(--muted); font-size: 0.85rem; text-align: center; }
+/* Trend block */
+.trend-block {
+  border: 1px solid var(--border); padding: 1rem 1.25rem; margin-bottom: 1.5rem;
+}
+.trend-block .meta { font-size: 11px; color: var(--muted); margin-top: 0.6rem;
+  letter-spacing: 0.05em; }
+
+footer {
+  margin-top: 3.5rem; padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted); font-size: 10px;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  text-align: left;
+}
+footer a { color: var(--fg-dim); }
+footer a:hover { color: var(--accent); }
 
 svg.sparkline { display: block; }
 """
@@ -152,26 +239,35 @@ def _score_class(s: int | float | None) -> str:
 
 
 def _emoji(s: int | float | None) -> str:
-    if s is None: return "—"
-    if s >= 80: return "🟢"
-    if s >= 60: return "🟡"
-    return "🔴"
+    # Kept for API compatibility but returns empty — terminal aesthetic
+    return ""
+
+
+def _status(s: int | float | None) -> str:
+    """Text status label — replaces emoji."""
+    if s is None: return "n/a"
+    if s >= 80: return "ok"
+    if s >= 60: return "warn"
+    return "fail"
 
 
 def _delta_html(delta: int | None) -> str:
-    if delta is None or delta == 0:
-        return "<span class='delta-flat'>→</span>"
+    if delta is None:
+        return ""
+    if delta == 0:
+        return "<span class='delta-flat'>±0</span>"
     if delta > 0:
-        return f"<span class='delta-up'>▲ +{delta}</span>"
-    return f"<span class='delta-down'>▼ {delta}</span>"
+        return f"<span class='delta-up'>+{delta}</span>"
+    return f"<span class='delta-down'>{delta}</span>"
 
 
-def _sparkline(values: list[int], width: int = 140, height: int = 36) -> str:
-    """Tiny inline SVG sparkline with last-point dot."""
+def _sparkline(values: list[int], width: int = 140, height: int = 32,
+                color: str = "#00d4aa") -> str:
+    """Tiny inline SVG sparkline. Mint accent dot at the latest point."""
     if not values:
         return ""
     if len(values) == 1:
-        values = values * 2  # need at least 2 points for a line
+        values = values * 2
     vmin, vmax = min(values), max(values)
     rng = max(1, vmax - vmin)
     step = width / (len(values) - 1) if len(values) > 1 else width
@@ -185,8 +281,8 @@ def _sparkline(values: list[int], width: int = 140, height: int = 36) -> str:
     last_y = height - ((values[-1] - vmin) / rng) * (height - 6) - 3
     return (
         f'<svg class="sparkline" width="{width}" height="{height}" viewBox="0 0 {width} {height}">'
-        f'<polyline points="{polyline}" fill="none" stroke="#4a9eff" stroke-width="1.5"/>'
-        f'<circle cx="{last_x:.1f}" cy="{last_y:.1f}" r="2.5" fill="#4a9eff"/>'
+        f'<polyline points="{polyline}" fill="none" stroke="#555" stroke-width="1"/>'
+        f'<circle cx="{last_x:.1f}" cy="{last_y:.1f}" r="2" fill="{color}"/>'
         f'</svg>'
     )
 
@@ -200,7 +296,9 @@ def _domain_slug(url: str) -> str:
 def _render_index(domains_data: list[dict], conn: sqlite3.Connection,
                    build_ts: str) -> str:
     """Build dashboard/index.html — overview of all domains."""
-    domain_cards = []
+    total_runs = sum(d["run_count"] for d in domains_data)
+
+    domain_rows = []
     for d in domains_data:
         score = d["latest_score"]
         score_class = _score_class(score)
@@ -209,14 +307,22 @@ def _render_index(domains_data: list[dict], conn: sqlite3.Connection,
             d["recent_runs"][-1]["score"] - d["recent_runs"][-2]["score"]
             if len(d["recent_runs"]) >= 2 else None
         )
-        domain_cards.append(f"""
-        <a class="card" href="{html.escape(d['slug'])}/index.html" style="text-decoration:none;color:inherit;display:block;">
-          <h3>{_emoji(score)} {html.escape(urlparse(d['url']).hostname or d['url'])}</h3>
-          <div class="score {score_class}">{score}</div>
+        hostname = urlparse(d['url']).hostname or d['url']
+        # Last-seen relative
+        try:
+            last_dt = datetime.fromisoformat(d['last_ts'].replace("Z","+00:00"))
+            ago_s = (datetime.now(timezone.utc) - last_dt).total_seconds()
+            ago = (f"{int(ago_s // 86400)}d" if ago_s >= 86400 else
+                   f"{int(ago_s // 3600)}h" if ago_s >= 3600 else
+                   f"{int(ago_s // 60)}m")
+        except Exception:
+            ago = d['last_ts']
+        domain_rows.append(f"""
+        <a class="card" href="{html.escape(d['slug'])}/index.html">
+          <span class="domain-name">{html.escape(hostname)}</span>
+          <span class="score {score_class}">{score}</span>
           {sparkline}
-          <div class="meta">
-            {len(d['recent_runs'])} runs · {_delta_html(delta)} · last {d['last_ts']}
-          </div>
+          <span class="meta">{_delta_html(delta) or '·'} &nbsp; {ago} &nbsp; {d['run_count']}r</span>
         </a>""")
 
     # Top recurring P0/P1 issues across all domains
@@ -231,35 +337,37 @@ def _render_index(domains_data: list[dict], conn: sqlite3.Connection,
     findings_rows = "\n".join(
         f"<tr class='sev-{sev.lower()}'>"
         f"<td><span class='badge badge-{sev.lower()}'>{sev}</span></td>"
-        f"<td><code>{html.escape(ck)}</code></td>"
+        f"<td>{html.escape(ck)}</td>"
         f"<td>{html.escape(text)}</td>"
         f"<td>{n_domains}</td>"
         f"<td>{n_total}</td></tr>"
         for sev, ck, text, n_domains, n_total in findings
-    ) or "<tr><td colspan='5' class='muted'>No P0/P1 findings recorded.</td></tr>"
+    ) or "<tr><td colspan='5' class='muted'>no P0/P1 findings recorded</td></tr>"
+
+    empty_msg = "<p class='muted'>no audits stored. run <code>page_score.py --format json &lt;url&gt; | audit_history.py store -</code></p>"
 
     return f"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
-<title>amazing-seo-skill — Dashboard</title>
+<title>amazing-seo-skill / dashboard</title>
 <link rel="stylesheet" href="style.css">
 </head><body>
 <header>
-  <h1>🟢 amazing-seo-skill — Dashboard</h1>
-  <p class="muted">{len(domains_data)} domain(s) tracked · Generated {build_ts}</p>
+  <div class="crumb">amazing-seo-skill / dashboard</div>
+  <h1>system overview</h1>
+  <div class="meta">{len(domains_data)} domains · {total_runs} runs · {build_ts}</div>
 </header>
 
-<h2>Domains</h2>
-<div class="cards">{"".join(domain_cards) or "<p class='muted'>No audits stored yet. Run <code>page_score.py --format json &lt;url&gt; | audit_history.py store -</code> first.</p>"}</div>
+<h2>domains</h2>
+<div class="cards">{"".join(domain_rows) or empty_msg}</div>
 
-<h2>Top recurring issues (P0/P1, across all domains)</h2>
+<h2>recurring issues — p0/p1, all domains</h2>
 <table>
-  <thead><tr><th>Severity</th><th>Checker</th><th>Issue</th><th>Domains</th><th>Total runs</th></tr></thead>
+  <thead><tr><th>sev</th><th>checker</th><th>issue</th><th>domains</th><th>runs</th></tr></thead>
   <tbody>{findings_rows}</tbody>
 </table>
 
 <footer>
-  Generated by <a href="https://github.com/metawhisp/amazing-seo-skill">amazing-seo-skill</a>
-  <code>build_dashboard.py</code> · {build_ts}
+  amazing-seo-skill · <a href="https://github.com/metawhisp/amazing-seo-skill">github</a>
 </footer>
 </body></html>"""
 
@@ -299,7 +407,7 @@ def _render_domain(domain_url: str, runs: list[dict], conn: sqlite3.Connection,
     rows_html = "\n".join(
         f"""<tr>
             <td><a href="run-{r['id']}.html">{r['ts']}</a></td>
-            <td class="{_score_class(r['score'])}">{r['score']}</td>
+            <td class="{_score_class(r['score'])}" style="text-align:right">{r['score']}</td>
             <td>{_delta_html(delta) if delta is not None else ''}</td>
           </tr>"""
         for r, delta in reversed(rows)
@@ -321,51 +429,59 @@ def _render_domain(domain_url: str, runs: list[dict], conn: sqlite3.Connection,
         rows_ = "\n".join(
             f"<tr class='sev-{sev.lower()}'>"
             f"<td><span class='badge badge-{sev.lower()}'>{sev}</span></td>"
-            f"<td><code>{html.escape(ck)}</code></td>"
+            f"<td>{html.escape(ck)}</td>"
             f"<td>{html.escape(text)}</td></tr>"
             for ck, text in items
         )
         findings_html.append(f"""
-          <h3>{sev} — {label} ({len(items)})</h3>
-          <table><thead><tr><th>Sev</th><th>Checker</th><th>Issue</th></tr></thead>
+          <h3>{label.lower()} — {len(items)}</h3>
+          <table><thead><tr><th>sev</th><th>checker</th><th>issue</th></tr></thead>
           <tbody>{rows_}</tbody></table>""")
+
+    hostname = urlparse(domain_url).hostname or domain_url
+    p0_n = len(findings_by_sev.get('P0', []))
+    p1_n = len(findings_by_sev.get('P1', []))
+    p2_n = len(findings_by_sev.get('P2', []))
+    score_cls = _score_class(latest['score'])
 
     return f"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
-<title>{html.escape(domain_url)} — Dashboard</title>
+<title>{html.escape(hostname)} / dashboard</title>
 <link rel="stylesheet" href="../style.css">
 </head><body>
 <header>
-  <p><a href="../index.html">← All domains</a></p>
-  <h1>{_emoji(latest['score'])} {html.escape(urlparse(domain_url).hostname or domain_url)}</h1>
-  <p class="url">{html.escape(domain_url)}</p>
-  <p class="muted">{len(runs)} runs · Generated {build_ts}</p>
+  <div class="crumb"><a href="../index.html">‹ all domains</a> / {html.escape(hostname)}</div>
+  <h1>{html.escape(hostname)}</h1>
+  <div class="url">{html.escape(domain_url)}</div>
+  <div class="meta">{len(runs)} runs · last {latest['ts']}</div>
 </header>
 
 <div class="score-card">
-  <div class="score-gauge {_score_class(latest['score'])}">{latest['score']}</div>
+  <div class="score-gauge {score_cls}">{latest['score']}</div>
   <div class="score-detail">
-    <p style="font-size:1.1rem;">Latest Health Score (out of <strong>100</strong>)</p>
-    <p class="muted">Last run: {latest['ts']}</p>
-    <p class="muted">{len(findings)} findings · {len(findings_by_sev.get('P0',[]))} critical, {len(findings_by_sev.get('P1',[]))} high, {len(findings_by_sev.get('P2',[]))} medium</p>
+    <div class="label">health score</div>
+    <p style="font-size:14px; margin-top: 0.3rem;">status: <span class="{score_cls}">{_status(latest['score'])}</span></p>
+    <p class="muted">{len(findings)} findings · {p0_n} p0 · {p1_n} p1 · {p2_n} p2</p>
   </div>
 </div>
 
-<h2>Score trend</h2>
-<div class="card">{big_spark}<p class="muted" style="margin-top:0.5rem">Range: {min(scores)} – {max(scores)} · Mean: {sum(scores)//len(scores)}</p></div>
+<h2>score trend</h2>
+<div class="trend-block">
+  {big_spark}
+  <div class="meta">range {min(scores)}–{max(scores)} · mean {sum(scores)//len(scores)} · {len(runs)} runs</div>
+</div>
 
-<h2>All runs</h2>
+<h2>runs</h2>
 <table>
-  <thead><tr><th>Timestamp</th><th>Score</th><th>Δ vs prev</th></tr></thead>
+  <thead><tr><th>timestamp</th><th style="text-align:right">score</th><th>Δ</th></tr></thead>
   <tbody>{rows_html}</tbody>
 </table>
 
-<h2>Findings from latest run</h2>
-{"".join(findings_html) or "<p class='muted'>No findings in latest run.</p>"}
+<h2>latest findings</h2>
+{"".join(findings_html) or "<p class='muted'>no findings in latest run</p>"}
 
 <footer>
-  Generated by <a href="https://github.com/metawhisp/amazing-seo-skill">amazing-seo-skill</a>
-  · {build_ts}
+  amazing-seo-skill · <a href="https://github.com/metawhisp/amazing-seo-skill">github</a>
 </footer>
 </body></html>"""
 
@@ -383,19 +499,19 @@ def _render_run(run: dict, payload: dict, conn: sqlite3.Connection) -> str:
         findings_by_sev.setdefault(f["severity"], []).append(f)
 
     sev_html = []
-    for sev, label in [("P0", "Critical"), ("P1", "High"), ("P2", "Medium")]:
+    for sev, label in [("P0", "critical"), ("P1", "high"), ("P2", "medium")]:
         items = findings_by_sev.get(sev, [])
         if not items:
             continue
         rows = "\n".join(
             f"<tr class='sev-{sev.lower()}'>"
             f"<td><span class='badge badge-{sev.lower()}'>{sev}</span></td>"
-            f"<td><code>{html.escape(f.get('checker','?'))}</code></td>"
+            f"<td>{html.escape(f.get('checker','?'))}</td>"
             f"<td>{html.escape(f.get('text',''))}</td></tr>"
             for f in items
         )
-        sev_html.append(f"<h3>{sev} — {label} ({len(items)})</h3>"
-                        f"<table><thead><tr><th>Sev</th><th>Checker</th><th>Issue</th></tr></thead>"
+        sev_html.append(f"<h3>{label} — {len(items)}</h3>"
+                        f"<table><thead><tr><th>sev</th><th>checker</th><th>issue</th></tr></thead>"
                         f"<tbody>{rows}</tbody></table>")
 
     cat_cards = []
@@ -411,33 +527,35 @@ def _render_run(run: dict, payload: dict, conn: sqlite3.Connection) -> str:
           <div class="cat-checkers">{html.escape(checkers)}</div>
         </div>""")
 
+    hostname = urlparse(run['url']).hostname or run['url']
     return f"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
-<title>Run {run['id']} — {html.escape(run['url'])}</title>
+<title>run #{run['id']} / {html.escape(hostname)}</title>
 <link rel="stylesheet" href="../style.css">
 </head><body>
 <header>
-  <p><a href="index.html">← Domain</a> · <a href="../index.html">All domains</a></p>
-  <h1>Run #{run['id']}</h1>
-  <p class="url">{html.escape(run['url'])}</p>
-  <p class="muted">{run['ts']}</p>
+  <div class="crumb"><a href="../index.html">‹ domains</a> / <a href="index.html">{html.escape(hostname)}</a> / run #{run['id']}</div>
+  <h1>run #{run['id']}</h1>
+  <div class="url">{html.escape(run['url'])}</div>
+  <div class="meta">{run['ts']}</div>
 </header>
 
 <div class="score-card">
-  <div class="score-gauge {score_cls}">{_emoji(score)} {score}</div>
+  <div class="score-gauge {score_cls}">{score}</div>
   <div class="score-detail">
-    <p style="font-size:1.1rem;">out of <strong>100</strong></p>
-    <p class="muted">Based on {summary.get('active_weight_pct', 0)}% of weight</p>
+    <div class="label">health score</div>
+    <p style="font-size:14px;">status: <span class="{score_cls}">{_status(score)}</span></p>
+    <p class="muted">based on {summary.get('active_weight_pct', 0)}% of weight</p>
   </div>
 </div>
 
-<h2>Score by category</h2>
+<h2>category scores</h2>
 <div class="cat-grid">{"".join(cat_cards)}</div>
 
-<h2>Findings</h2>
-{"".join(sev_html) or "<p class='muted'>No findings.</p>"}
+<h2>findings</h2>
+{"".join(sev_html) or "<p class='muted'>no findings</p>"}
 
-<footer>Generated by <a href="https://github.com/metawhisp/amazing-seo-skill">amazing-seo-skill</a></footer>
+<footer>amazing-seo-skill · <a href="https://github.com/metawhisp/amazing-seo-skill">github</a></footer>
 </body></html>"""
 
 

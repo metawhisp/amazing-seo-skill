@@ -29,75 +29,110 @@ from datetime import datetime, timezone
 
 
 _CSS = """
+/* amazing-seo-skill report — terminal minimal */
 :root {
-  --bg: #0f1419; --fg: #e6e6e6; --muted: #8a8a8a; --card: #1a1f2e;
-  --border: #2a3142; --accent: #4a9eff;
-  --green: #4ade80; --yellow: #facc15; --red: #f87171; --orange: #fb923c;
-  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+  --bg:       #0a0a0a;
+  --bg-alt:   #111111;
+  --fg:       #e4e4e4;
+  --fg-dim:   #888;
+  --muted:    #555;
+  --border:   #1c1c1c;
+  --accent:   #00d4aa;
+  --good:     #00d4aa;
+  --warn:     #ffb800;
+  --bad:      #ff4757;
+  --mono: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', ui-monospace, Menlo, monospace;
 }
 * { box-sizing: border-box; }
+html { background: var(--bg); }
 body {
-  margin: 0; padding: 2rem; background: var(--bg); color: var(--fg);
-  font-family: var(--font); line-height: 1.5; font-size: 15px;
-  max-width: 1100px; margin: 0 auto;
+  margin: 0 auto; padding: 2.5rem 2rem; background: var(--bg); color: var(--fg);
+  font-family: var(--mono); font-size: 13px; line-height: 1.6;
+  letter-spacing: 0.01em; max-width: 1100px;
+  font-feature-settings: "ss01", "cv02";
+  -webkit-font-smoothing: antialiased;
 }
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--fg); }
+
 header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
-h1 { margin: 0 0 0.5rem 0; font-weight: 600; font-size: 1.8rem; }
-h2 { margin-top: 2.5rem; margin-bottom: 1rem; font-size: 1.25rem;
-     border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; font-weight: 600; }
-h3 { margin-top: 1.5rem; margin-bottom: 0.75rem; font-size: 1.05rem; }
-.url { font-family: var(--mono); color: var(--accent); word-break: break-all; }
-.muted { color: var(--muted); font-size: 0.875rem; }
+header .crumb { color: var(--muted); font-size: 12px; margin-bottom: 0.6rem; letter-spacing: 0.04em; }
+header h1 { margin: 0 0 0.3rem 0; font-weight: 500; font-size: 18px; letter-spacing: 0.02em; }
+header .url { color: var(--fg-dim); font-size: 12px; word-break: break-all; }
+header .meta { color: var(--muted); font-size: 11px; margin-top: 0.5rem; letter-spacing: 0.05em; text-transform: uppercase; }
+
+h2 {
+  margin: 2.5rem 0 1rem 0; font-weight: 500; font-size: 12px;
+  color: var(--fg-dim); text-transform: uppercase; letter-spacing: 0.15em;
+  padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+}
+h2::before { content: "» "; color: var(--accent); }
+h3 {
+  margin-top: 1.25rem; margin-bottom: 0.5rem; font-size: 12px; font-weight: 500;
+  color: var(--fg-dim); text-transform: uppercase; letter-spacing: 0.1em;
+}
+.url { color: var(--fg-dim); }
+.muted { color: var(--muted); font-size: 12px; }
 
 .score-card {
-  display: flex; gap: 2rem; align-items: center;
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 2rem;
+  display: grid; grid-template-columns: auto 1fr;
+  gap: 2rem; align-items: center;
+  border: 1px solid var(--border); padding: 1.25rem 1.5rem; margin-bottom: 2rem;
 }
-.score-gauge { font-size: 4rem; font-weight: 700; line-height: 1; }
-.score-detail { flex: 1; }
-.score-detail p { margin: 0.25rem 0; }
+.score-gauge {
+  font-size: 56px; font-weight: 400; line-height: 1;
+  font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+}
+.score-detail { font-size: 12px; }
+.score-detail .label {
+  color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.12em; font-size: 10px; margin-bottom: 0.2rem;
+}
+.score-detail p { margin: 0.2rem 0; }
 
 .cat-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 0.75rem; margin-bottom: 1.5rem;
+  gap: 0.5rem; margin-bottom: 1.5rem;
 }
-.cat-card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 8px; padding: 0.75rem 1rem;
-}
-.cat-name { color: var(--muted); font-size: 0.85rem; text-transform: uppercase;
-            letter-spacing: 0.5px; }
-.cat-score { font-size: 1.5rem; font-weight: 600; margin: 0.25rem 0; }
-.cat-checkers { font-size: 0.8rem; color: var(--muted); }
+.cat-card { border: 1px solid var(--border); padding: 0.7rem 0.9rem; }
+.cat-name { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; }
+.cat-score { font-size: 22px; font-weight: 400; margin: 0.2rem 0; font-variant-numeric: tabular-nums; }
+.cat-checkers { font-size: 11px; color: var(--fg-dim); }
 
-table { width: 100%; border-collapse: collapse; margin: 1rem 0;
-        background: var(--card); border: 1px solid var(--border); border-radius: 8px;
-        overflow: hidden; }
-th { background: rgba(255,255,255,0.04); text-align: left;
-     padding: 0.6rem 0.9rem; font-weight: 600; font-size: 0.85rem;
-     color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;
-     border-bottom: 1px solid var(--border); }
-td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+table { width: 100%; border-collapse: collapse; margin: 0.5rem 0 1rem; font-size: 12px; }
+th {
+  text-align: left; padding: 0.5rem 0.8rem 0.5rem 0;
+  font-weight: 500; font-size: 10px;
+  color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em;
+  border-bottom: 1px solid var(--border);
+}
+td { padding: 0.55rem 0.8rem 0.55rem 0; border-bottom: 1px solid var(--border); vertical-align: top; font-variant-numeric: tabular-nums; }
 tr:last-child td { border-bottom: none; }
 
-.sev-p0 { background: rgba(248,113,113,0.08); border-left: 3px solid var(--red); }
-.sev-p1 { background: rgba(251,146,60,0.06); border-left: 3px solid var(--orange); }
-.sev-p2 { background: rgba(250,204,21,0.04); border-left: 3px solid var(--yellow); }
+.sev-p0 td:first-child { border-left: 2px solid var(--bad); padding-left: 0.6rem; }
+.sev-p1 td:first-child { border-left: 2px solid var(--warn); padding-left: 0.6rem; }
+.sev-p2 td:first-child { border-left: 2px solid var(--muted); padding-left: 0.6rem; }
 
-.badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px;
-         font-family: var(--mono); font-size: 0.75rem; font-weight: 600; }
-.badge-p0 { background: rgba(248,113,113,0.15); color: var(--red); }
-.badge-p1 { background: rgba(251,146,60,0.15); color: var(--orange); }
-.badge-p2 { background: rgba(250,204,21,0.12); color: var(--yellow); }
+.badge {
+  display: inline-block; padding: 0.05rem 0.4rem;
+  font-family: var(--mono); font-size: 10px; font-weight: 500;
+  letter-spacing: 0.1em; border: 1px solid currentColor;
+}
+.badge-p0 { color: var(--bad); }
+.badge-p1 { color: var(--warn); }
+.badge-p2 { color: var(--fg-dim); }
 
-.score-good { color: var(--green); }
-.score-warn { color: var(--yellow); }
-.score-bad  { color: var(--red); }
+.score-good { color: var(--good); }
+.score-warn { color: var(--warn); }
+.score-bad  { color: var(--bad); }
 
-footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border);
-         color: var(--muted); font-size: 0.85rem; text-align: center; }
+footer {
+  margin-top: 3.5rem; padding-top: 1rem; border-top: 1px solid var(--border);
+  color: var(--muted); font-size: 10px;
+  letter-spacing: 0.15em; text-transform: uppercase; text-align: left;
+}
+footer a { color: var(--fg-dim); }
+footer a:hover { color: var(--accent); }
 """
 
 
@@ -109,12 +144,11 @@ def _score_class(s: int | float) -> str:
     return "score-bad"
 
 
-def _emoji(s: int | float) -> str:
-    if s is None:
-        return "—"
-    if s >= 80: return "🟢"
-    if s >= 60: return "🟡"
-    return "🔴"
+def _status(s: int | float | None) -> str:
+    if s is None: return "n/a"
+    if s >= 80: return "ok"
+    if s >= 60: return "warn"
+    return "fail"
 
 
 def _render_page(data: dict) -> str:
@@ -130,26 +164,21 @@ def _render_page(data: dict) -> str:
         findings_by_sev.setdefault(f["severity"], []).append(f)
 
     sev_html = []
-    for sev, label, desc in [
-        ("P0", "Critical", "Blocks indexing or causes penalties"),
-        ("P1", "High", "Significantly impacts rankings"),
-        ("P2", "Medium", "Optimization opportunity"),
-    ]:
+    for sev, label in [("P0", "critical"), ("P1", "high"), ("P2", "medium")]:
         items = findings_by_sev.get(sev, [])
         if not items:
             continue
         rows = "\n".join(
             f"<tr class='sev-{sev.lower()}'>"
             f"<td><span class='badge badge-{sev.lower()}'>{sev}</span></td>"
-            f"<td><code>{html.escape(f.get('checker','?'))}</code></td>"
+            f"<td>{html.escape(f.get('checker','?'))}</td>"
             f"<td>{html.escape(f.get('text',''))}</td></tr>"
             for f in items
         )
         sev_html.append(f"""
-        <h3>{sev} — {label} ({len(items)})</h3>
-        <p class='muted'>{desc}</p>
+        <h3>{label} — {len(items)}</h3>
         <table>
-          <thead><tr><th>Severity</th><th>Checker</th><th>Issue</th></tr></thead>
+          <thead><tr><th>sev</th><th>checker</th><th>issue</th></tr></thead>
           <tbody>{rows}</tbody>
         </table>""")
 
@@ -163,37 +192,38 @@ def _render_page(data: dict) -> str:
         cat_cards.append(f"""
         <div class='cat-card'>
           <div class='cat-name'>{html.escape(cat)}</div>
-          <div class='cat-score {_score_class(s)}'>{s if s is not None else '—'}<span class='muted' style='font-size:0.9rem'> /100</span></div>
+          <div class='cat-score {_score_class(s)}'>{s if s is not None else '—'}</div>
           <div class='cat-checkers'>{html.escape(checkers)}</div>
         </div>""")
 
     return f"""<!DOCTYPE html>
 <html lang='en'><head><meta charset='utf-8'>
-<title>SEO Page Score — {html.escape(target)}</title>
+<title>{html.escape(target)} / page report</title>
 <style>{_CSS}</style></head><body>
 <header>
-  <h1>Page Score Report</h1>
-  <p class='url'>{html.escape(target)}</p>
-  <p class='muted'>Generated {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')} · amazing-seo-skill</p>
+  <div class="crumb">amazing-seo-skill / page report</div>
+  <h1>page audit</h1>
+  <div class='url'>{html.escape(target)}</div>
+  <div class='meta'>{datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}</div>
 </header>
 
 <div class='score-card'>
-  <div class='score-gauge {score_cls}'>{_emoji(score)} {score}</div>
+  <div class='score-gauge {score_cls}'>{score}</div>
   <div class='score-detail'>
-    <p style='font-size:1.1rem;'>out of <strong>100</strong></p>
-    <p class='muted'>Based on {summary.get('active_weight_pct', 0)}% of total weight</p>
-    <p class='muted'>{len(findings)} findings total
-      ({len(findings_by_sev.get('P0',[]))} critical, {len(findings_by_sev.get('P1',[]))} high, {len(findings_by_sev.get('P2',[]))} medium)</p>
+    <div class='label'>health score</div>
+    <p style="font-size:14px;">status: <span class="{score_cls}">{_status(score)}</span></p>
+    <p class='muted'>based on {summary.get('active_weight_pct', 0)}% of weight</p>
+    <p class='muted'>{len(findings)} findings · {len(findings_by_sev.get('P0',[]))} p0 · {len(findings_by_sev.get('P1',[]))} p1 · {len(findings_by_sev.get('P2',[]))} p2</p>
   </div>
 </div>
 
-<h2>Score by category</h2>
+<h2>category scores</h2>
 <div class='cat-grid'>{"".join(cat_cards)}</div>
 
-<h2>Findings</h2>
-{"".join(sev_html) or "<p class='muted'>No findings — page is clean.</p>"}
+<h2>findings</h2>
+{"".join(sev_html) or "<p class='muted'>no findings — page is clean</p>"}
 
-<footer>Generated by <a href='https://github.com/metawhisp/amazing-seo-skill' style='color: var(--accent)'>amazing-seo-skill</a>. Re-run with <code>scripts/page_score.py</code>.</footer>
+<footer>amazing-seo-skill · <a href='https://github.com/metawhisp/amazing-seo-skill'>github</a></footer>
 </body></html>"""
 
 
