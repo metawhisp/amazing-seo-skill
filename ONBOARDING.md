@@ -57,6 +57,7 @@ labelled "Confirmed"** because they're data-backed.
 | `aeo_gemini.py` | Gemini + Google Search grounding probe (Google AI Overviews proxy) |
 | `parse_html.py` | Extract title/meta/headings/canonical/hreflang/images/links/schema from saved HTML |
 | `fetch_page.py` | Standalone fetcher with SSRF guard; saves HTML to disk for offline analysis |
+| `amazing_crawl.py` | Open-source async crawler — SF alternative when SF isn't installed or you exceed the 500-URL free tier. Captures status/title/meta/canonical/H1/schema/links per URL into SQLite, resumes from checkpoint, exports CSV/JSON |
 | `page_score.py` | **All-in-one orchestrator** — runs every checker above in parallel, aggregates to 0-100 Health Score with prioritized findings |
 
 **Requires:** `./install.sh` (or manual `.venv` setup with

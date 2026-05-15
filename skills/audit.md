@@ -26,18 +26,19 @@ specific category deep-dives.
 
 ## Process
 
-1. **Screaming Frog crawl** (FIRST STEP — always run if SF is installed):
-   *External dependency: requires Screaming Frog SEO Spider installed locally. If not installed, skip this step and rely on `scripts/internal_link_graph.py` + WebFetch instead.*
+1. **Crawl** (FIRST STEP — use the smart dispatcher):
+
    ```bash
-   SF="/Applications/Screaming Frog SEO Spider.app/Contents/MacOS/ScreamingFrogSEOSpiderLauncher"
-   timeout 600 "$SF" \
-     --crawl "https://TARGET_DOMAIN" \
-     --headless \
-     --output-folder /tmp/sf-crawl/TARGET_DOMAIN \
-     --export-tabs "Internal:All,Response Codes:All,Page Titles:All,Page Titles:Duplicate,Meta Description:All,Meta Description:Missing,Meta Description:Duplicate,H1:All,H1:Duplicate,H1:Missing,H2:All,H2:Duplicate,Canonicals:All,Directives:All,Hreflang:All,Images:Missing Alt Text,Structured Data:All" \
-     --overwrite 2>&1 | grep -E "SpiderProgress|Completed|Exporting|ERROR|FATAL"
+   tools/crawl.sh https://TARGET_DOMAIN --max-pages 5000
    ```
-   Then parse the CSV results and use them as the data source for all subsequent analysis steps. See `seo-screaming-frog` skill for full reference.
+
+   The dispatcher auto-selects:
+   - **Screaming Frog** if installed and ≤500 URLs (better data quality)
+   - **amazing-crawl** (our async Python crawler) otherwise — unlimited URLs,
+     no GUI required, works in CI/Docker, free.
+
+   Force the choice with `--force-sf` or `--force-amazing`. Results land
+   in CSV/SQLite for downstream analysis steps.
 
 2. **Fetch homepage** — use `curl` to retrieve HTML for business type detection
 3. **Detect business type** — analyze homepage signals per seo orchestrator

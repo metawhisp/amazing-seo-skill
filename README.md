@@ -17,6 +17,7 @@ data-driven growth opportunities — all from a single Claude Code prompt.
 ## What it does
 
 ### Traditional SEO
+- **Smart crawler** via `tools/crawl.sh` — auto-selects between Screaming Frog (≤500 URLs free tier) and our own **`amazing-crawl`** (async Python, unlimited URLs, no GUI, works in CI/Docker)
 - **Full website audits** via `tools/site_audit.sh` — parallelises per-page audits across sampled sitemap URLs, emits unified Markdown report
 - **Single-page Health Score** via `scripts/page_score.py` — every L1 check on one URL, aggregated 0-100 with prioritized findings
 - **HTML visual report** via `scripts/render_html_report.py` — styled standalone HTML for stakeholder sharing

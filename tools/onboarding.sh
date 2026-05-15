@@ -63,7 +63,7 @@ VENV_PY="$SKILL_DIR/.venv/bin/python"
 if [ -x "$VENV_PY" ]; then
   ok ".venv exists ($($VENV_PY --version 2>&1))"
   # Probe required packages
-  for pkg in requests bs4 lxml playwright; do
+  for pkg in requests httpx bs4 lxml playwright; do
     if "$VENV_PY" -c "import $pkg" 2>/dev/null; then
       ok "  $pkg installed"
     else
