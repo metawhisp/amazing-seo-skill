@@ -8,6 +8,21 @@ description: >
 
 # Single Page Analysis
 
+## Fast path — one command
+
+For most use cases, just run the orchestrator. It runs every applicable
+L1 checker in parallel and emits a Markdown report with a Health Score:
+
+```
+scripts/page_score.py <url>                  # Markdown to stdout
+scripts/page_score.py <url> --format json    # structured for piping
+scripts/page_score.py <url> --no-psi         # skip CWV (no PSI key)
+```
+
+That covers: redirects, security headers, schema, images, broken links,
+PSI/CWV, hreflang, llms.txt, on-page HTML. Use the sections below when
+you need finer control or only want one specific aspect.
+
 ## What to Analyze
 
 ### On-Page SEO
@@ -46,7 +61,16 @@ description: >
 - Dimensions: width/height set for CLS prevention
 - Lazy loading: loading="lazy" on below-fold images
 
-### Core Web Vitals (reference only — not measurable from HTML alone)
+### Core Web Vitals
+For real measurements, run the deterministic checker:
+```
+scripts/psi_checker.py <url>            # mobile (default, matches Google's mobile-first index)
+scripts/psi_checker.py <url> --desktop  # desktop strategy
+```
+Returns CrUX field 75th-percentile LCP/INP/CLS/FCP/TTFB when available, plus
+Lighthouse lab data, with per-metric verdicts.
+
+Without measurements (e.g. PSI quota exhausted), use HTML-only heuristics:
 - Flag potential LCP issues (huge hero images, render-blocking resources)
 - Flag potential INP issues (heavy JS, no async/defer)
 - Flag potential CLS issues (missing image dimensions, injected content)

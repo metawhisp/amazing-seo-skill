@@ -1,5 +1,5 @@
-<!-- Updated: 2026-02-07 -->
-# Core Web Vitals Thresholds (February 2026)
+<!-- Updated: 2026-05-15 -->
+# Core Web Vitals Thresholds (May 2026)
 
 ## Current Metrics
 
@@ -16,7 +16,7 @@
 - Core Web Vitals are a **tiebreaker** ranking signal — they matter most when content quality is similar between competitors.
 - **Thresholds unchanged since original definitions** — ignore claims of "tightened thresholds" from SEO blogs.
 - December 2025 core update appeared to weight **mobile CWV more heavily**.
-- As of October 2025: **57.1%** desktop sites and **49.7%** mobile sites pass all three CWV.
+- Per the 2025 Web Almanac (CrUX, July 2025): **~56%** desktop sites and **~48%** mobile sites pass all three CWV. Per-metric pass rates (mobile): CLS ~75%, INP ~72%, LCP ~58%.
 
 ## LCP Subparts (February 2025 CrUX Addition)
 

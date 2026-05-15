@@ -8,6 +8,22 @@ description: >
 
 # Sitemap Analysis & Generation
 
+## Deterministic checker — always run first
+
+```
+scripts/sitemap_validator.py <url> --sample 20 --check-robots
+```
+
+Returns JSON with:
+- XML validity, sitemap-index recursion
+- URL count per file and total (vs 50k / 50 MiB protocol limits)
+- HTTPS-only check, lastmod presence + format
+- Deprecated `<priority>` / `<changefreq>` usage counts
+- HTTP-status sample on `--sample` URLs (default 20)
+- Cross-check against `/robots.txt` Sitemap: directive (`--check-robots`)
+
+Use that JSON as the data source for all subsequent reasoning below.
+
 ## Mode 1: Analyze Existing Sitemap
 
 ### Validation Checks

@@ -13,6 +13,18 @@ Validate existing hreflang implementations or generate correct hreflang tags
 for multi-language and multi-region sites. Supports HTML, HTTP header, and
 XML sitemap implementations.
 
+## Deterministic checker — always run first
+
+```
+scripts/hreflang_checker.py <url> --check-reciprocity
+```
+
+Returns JSON with: declarations (HTML + HTTP header), BCP-47 validity,
+x-default presence, self-reference, duplicate-language detection, and parallel
+reciprocity probe (each declared alternate is fetched to confirm it links back).
+Reasoning on top of that JSON is **Likely**; pure reasoning without it is
+**Hypothesis** only.
+
 ## Validation Checks
 
 ### 1. Self-Referencing Tags

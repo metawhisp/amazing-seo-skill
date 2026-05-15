@@ -22,19 +22,15 @@ from __future__ import annotations
 import json
 import re
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
 
+from _fetch import fetch
+
 BCP47 = re.compile(r"^(?:x-default|[a-z]{2,3}(?:-[A-Z]{2})?(?:-[a-z]{4})?(?:-[A-Z]{2})?)$", re.IGNORECASE)
-
-
-def fetch(url: str, timeout: int = 15):
-    return requests.get(
-        url, timeout=timeout, allow_redirects=True,
-        headers={"User-Agent": "amazing-seo-skill/hreflang-checker"},
-    )
 
 
 def extract_from_html(html: str, base_url: str) -> list[dict]:
@@ -93,17 +89,28 @@ def validate(url: str, decls: list[dict], check_reciprocity: bool) -> dict:
 
     reciprocity_problems = []
     if check_reciprocity and decls:
-        for d in decls:
-            if d["href"].rstrip("/") == self_url:
-                continue
+        targets = [d for d in decls if d["href"].rstrip("/") != self_url]
+
+        def _check_one(d: dict) -> dict | None:
             try:
                 r = fetch(d["href"], timeout=15)
-                back = extract_from_html(r.text, d["href"]) + extract_from_headers(dict(r.headers), d["href"])
+                back = (
+                    extract_from_html(r.text, d["href"])
+                    + extract_from_headers(dict(r.headers), d["href"])
+                )
                 back_hrefs = {b["href"].rstrip("/") for b in back}
                 if self_url not in back_hrefs:
-                    reciprocity_problems.append({"target": d["href"], "lang": d["lang"], "missing_return_link": True})
+                    return {"target": d["href"], "lang": d["lang"], "missing_return_link": True}
+                return None
             except requests.RequestException as e:
-                reciprocity_problems.append({"target": d["href"], "lang": d["lang"], "error": str(e)})
+                return {"target": d["href"], "lang": d["lang"], "error": str(e)}
+
+        # Cap concurrency to be polite — never hammer a single origin
+        with ThreadPoolExecutor(max_workers=min(8, max(1, len(targets)))) as pool:
+            for fut in as_completed(pool.submit(_check_one, d) for d in targets):
+                problem = fut.result()
+                if problem:
+                    reciprocity_problems.append(problem)
 
     return {"issues": issues, "reciprocity_problems": reciprocity_problems}
 

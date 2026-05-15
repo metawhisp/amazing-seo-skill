@@ -33,7 +33,10 @@ def parse_html(html: str, base_url: Optional[str] = None) -> dict:
     Returns:
         Dictionary with extracted SEO data
     """
-    soup = BeautifulSoup(html, "lxml" if "lxml" in sys.modules else "html.parser")
+    try:
+        soup = BeautifulSoup(html, "lxml")
+    except Exception:
+        soup = BeautifulSoup(html, "html.parser")
 
     result = {
         "title": None,

@@ -7,26 +7,32 @@ spec (https://llmstxt.org). Reports:
   - existence + HTTP status
   - file size, line count
   - presence of recommended sections (# Title, > description, ## Sections)
-  - link density and link validity (HTTP 200 on referenced URLs)
+  - link density + link validity: each markdown link is HEAD-checked (GET
+    fallback if HEAD is rejected). Capped at 30 unique URLs.
   - heuristic AEO signals (does the file address LLMs directly?)
 
-Exit code: 0 if file exists and is well-formed, 1 if missing, 2 if malformed.
+Exit code: 0 if file exists, is well-formed, and links resolve;
+           1 if missing; 2 if malformed or links broken.
 
 Usage:
-    llms_txt_checker.py <domain_or_url>
+    llms_txt_checker.py <domain_or_url> [--skip-links]
 
 Example:
     llms_txt_checker.py example.com
     llms_txt_checker.py https://example.com
+    llms_txt_checker.py example.com --skip-links  # don't probe link targets
 """
 from __future__ import annotations
 
 import json
 import re
 import sys
-from urllib.parse import urlparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from urllib.parse import urljoin, urlparse
 
 import requests
+
+from _fetch import fetch as _fetch_url
 
 
 def normalize(target: str) -> str:
@@ -39,8 +45,7 @@ def normalize(target: str) -> str:
 
 def fetch(url: str, timeout: int = 10) -> tuple[int, str, dict]:
     try:
-        r = requests.get(url, timeout=timeout, allow_redirects=True,
-                         headers={"User-Agent": "amazing-seo-skill/llms-txt-checker"})
+        r = _fetch_url(url, timeout=timeout)
         return r.status_code, r.text, dict(r.headers)
     except requests.RequestException as e:
         return 0, str(e), {}
@@ -103,13 +108,63 @@ def score_file(stats: dict) -> tuple[int, list[str]]:
     return max(0, score), issues
 
 
-def main() -> int:
-    if len(sys.argv) != 2:
-        print(__doc__.strip().split("\n\n")[0])
-        print("\nUsage: llms_txt_checker.py <domain_or_url>", file=sys.stderr)
-        return 64
+def _check_links(text: str, base_url: str, max_links: int = 30) -> dict:
+    """HEAD-check every markdown link in the file (capped at max_links).
 
-    base = normalize(sys.argv[1])
+    Reports broken (non-200) and unreachable URLs. HEAD with GET fallback so
+    sites that 405 on HEAD are still validated.
+    """
+    md_links = re.findall(r"\[([^\]]+)\]\(([^)]+)\)", text)
+    seen: set[str] = set()
+    targets: list[str] = []
+    for _, href in md_links:
+        absolute = urljoin(base_url, href.strip())
+        if absolute in seen:
+            continue
+        seen.add(absolute)
+        targets.append(absolute)
+        if len(targets) >= max_links:
+            break
+
+    def _probe(url: str) -> tuple[str, int | None, str | None]:
+        try:
+            r = requests.head(url, timeout=10, allow_redirects=True,
+                              headers={"User-Agent": "amazing-seo-skill/llms-txt-link-check"})
+            if r.status_code in (405, 403) or r.status_code >= 400:
+                r = _fetch_url(url, timeout=10)
+            return url, r.status_code, None
+        except requests.RequestException as e:
+            return url, None, str(e)
+
+    results: list[dict] = []
+    if not targets:
+        return {"links_total": 0, "links_checked": 0, "broken": [], "unreachable": []}
+
+    with ThreadPoolExecutor(max_workers=min(8, len(targets))) as pool:
+        for fut in as_completed(pool.submit(_probe, u) for u in targets):
+            url, status, err = fut.result()
+            results.append({"url": url, "status": status, "error": err})
+
+    broken = [r for r in results if r["status"] is not None and r["status"] >= 400]
+    unreachable = [r for r in results if r["status"] is None]
+    return {
+        "links_total": len(md_links),
+        "links_checked": len(targets),
+        "broken_count": len(broken),
+        "unreachable_count": len(unreachable),
+        "broken": broken,
+        "unreachable": unreachable,
+    }
+
+
+def main() -> int:
+    if len(sys.argv) < 2 or len(sys.argv) > 3:
+        print(__doc__.strip().split("\n\n")[0])
+        print("\nUsage: llms_txt_checker.py <domain_or_url> [--skip-links]", file=sys.stderr)
+        return 64
+    skip_links = "--skip-links" in sys.argv
+
+    base = normalize(sys.argv[1] if not sys.argv[1].startswith("--") else sys.argv[2])
     url = f"{base}/llms.txt"
 
     status, body, headers = fetch(url)
@@ -137,6 +192,15 @@ def main() -> int:
         "issues": issues,
         "content_type": headers.get("content-type", "?"),
     })
+
+    if not skip_links:
+        link_check = _check_links(body, base)
+        result["link_validity"] = link_check
+        if link_check.get("broken_count", 0) > 0:
+            issues.append(f"{link_check['broken_count']} of {link_check['links_checked']} linked URLs return 4xx/5xx")
+            score = max(0, score - min(20, link_check["broken_count"] * 3))
+            result["score"] = score
+            result["issues"] = issues
 
     print(json.dumps(result, indent=2, ensure_ascii=False))
     return 0 if score >= 70 else 2

@@ -10,13 +10,18 @@ description: >
   "ChatGPT search", or "AI visibility".
 ---
 
-# AI Search / GEO Optimization (February 2026)
+# AI Search / GEO Optimization (May 2026)
+
+<!-- Stats verified May 2026. Re-verify before relying on specific numbers
+     older than 90 days — AI-search landscape moves fast (e.g. the AI-Overview
+     top-10 citation share dropped from 92% to 38% between mid-2024 and
+     mid-2025 per Ahrefs). -->
 
 ## Key Statistics
 
 | Metric | Value | Source |
 |--------|-------|--------|
-| AI Overviews reach | 1.5 billion users/month across 200+ countries | Google |
+| AI Overviews reach | 2 billion users/month across 200+ countries | Google (early 2026 update) |
 | AI Overviews query coverage | 50%+ of all queries | Industry data |
 | AI-referred sessions growth | 527% (Jan-May 2025) | SparkToro |
 | ChatGPT weekly active users | 900 million | OpenAI |
@@ -24,18 +29,24 @@ description: >
 
 ## Critical Insight: Brand Mentions > Backlinks
 
-**Brand mentions correlate 3× more strongly with AI visibility than backlinks.**
-(Ahrefs December 2025 study of 75,000 brands)
+**Brand mentions correlate ~3× more strongly with AI visibility than backlinks.**
+(Ahrefs 75K-brands study, 2025 update; YouTube-mentions update December 2025)
 
-| Signal | Correlation with AI Citations |
-|--------|------------------------------|
-| YouTube mentions | ~0.737 (strongest) |
-| Reddit mentions | High |
-| Wikipedia presence | High |
-| LinkedIn presence | Moderate |
-| Domain Rating (backlinks) | ~0.266 (weak) |
+| Signal | Correlation with AI Overview visibility |
+|--------|----------------------------------------|
+| YouTube mentions (titles, transcripts, descriptions) | ~0.737 (strongest single factor) |
+| Brand web mentions (any context) | 0.664 |
+| Backlinks (raw count) | 0.218 |
 
 **Only 11% of domains** are cited by both ChatGPT and Google AI Overviews for the same query — platform-specific optimization is essential.
+
+### Citation source mix — keep current
+
+The share of AI-Overview citations coming from **top-10 organic results**
+dropped from **~92% in mid-2024 to ~38% by late 2025** (Ahrefs longitudinal
+study). The implication: traditional rank-1-to-10 optimization alone no
+longer guarantees AI citation. Off-page brand signals (YouTube, Reddit,
+forums, earned media) now drive the majority of citations.
 
 ---
 
@@ -61,7 +72,10 @@ description: >
 
 ### 2. Structural Readability (20%)
 
-**92% of AI Overview citations come from top-10 ranking pages**, but 47% come from pages ranking below position 5 — demonstrating different selection logic.
+The share of AI-Overview citations from top-10 organic results has fallen
+to **~38%** (Ahrefs longitudinal study, late 2025) — meaning the majority
+of AI-Overview citations now come from pages outside the top 10. Ranking
+helps but is no longer the dominant signal.
 
 **Strong signals:**
 - Clean H1→H2→H3 heading hierarchy
@@ -179,10 +193,11 @@ New standard (December 2025) for machine-readable AI licensing terms.
 
 | Platform | Key Citation Sources | Optimization Focus |
 |----------|---------------------|-------------------|
-| **Google AI Overviews** | Top-10 ranking pages (92%) | Traditional SEO + passage optimization |
-| **ChatGPT** | Wikipedia (47.9%), Reddit (11.3%) | Entity presence, authoritative sources |
-| **Perplexity** | Reddit (46.7%), Wikipedia | Community validation, discussions |
+| **Google AI Overviews** | Top-10 ranking pages (~38%, down from ~92% mid-2024); strong YouTube share | Traditional SEO + YouTube + earned mentions |
+| **ChatGPT** | Wikipedia (~13%), Reddit (~12%), high overall Reddit/forum share across LLMs | Entity presence, authoritative sources, Reddit/forum visibility |
+| **Perplexity** | Reddit (heavy), Wikipedia, community sources | Community validation, discussions |
 | **Bing Copilot** | Bing index, authoritative sites | Bing SEO, IndexNow |
+| **Google AI Mode / Gemini** | Same Google index + Gemini ranking layer | Same as AIO + structured data + entity clarity |
 
 ---
 

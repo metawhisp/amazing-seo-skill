@@ -95,7 +95,14 @@ echo "==> Verifying"
 
 echo ""
 echo "==> Done. For multi-LLM ensemble (L4), store API keys in macOS Keychain:"
-echo '    security add-generic-password -s anthropic-api-key  -a $USER -w'
-echo '    security add-generic-password -s openai-api-key     -a $USER -w'
-echo '    security add-generic-password -s perplexity-api-key -a $USER -w'
-echo '    security add-generic-password -s x.ai-api-key       -a $USER -w'
+echo '    security add-generic-password -s anthropic-api-key      -a $USER -w'
+echo '    security add-generic-password -s openai-api-key         -a $USER -w'
+echo '    security add-generic-password -s perplexity-api-key     -a $USER -w'
+echo '    security add-generic-password -s x.ai-api-key           -a $USER -w'
+echo '    security add-generic-password -s google-gemini-api-key  -a $USER -w  # Gemini + Google Search (AIO proxy)'
+echo ''
+echo "For real-browser CWV via PageSpeed Insights API (raises rate limit):"
+echo '    security add-generic-password -s google-psi-api-key     -a $USER -w'
+echo ''
+echo "==> Now run ./tools/onboarding.sh — it reports which layers are active"
+echo "    and what's missing on your machine. Re-run any time."

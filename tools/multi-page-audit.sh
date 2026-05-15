@@ -12,6 +12,19 @@ set -e
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$SKILL_DIR"
 
+# Verify the deep-audit engine is configured before doing any work — otherwise
+# the audit loop below silently produces N empty JSON files and the aggregator
+# crashes with a confusing error.
+if [ -f .bin/.engines.env ]; then
+  # shellcheck disable=SC1091
+  source .bin/.engines.env
+fi
+if [ -z "${AMAZING_SEO_DEEP_AUDIT_ENGINE:-}" ] || [ ! -x "${AMAZING_SEO_DEEP_AUDIT_ENGINE:-/nonexistent}" ]; then
+  echo "ERROR: deep-audit engine not configured. Run ./install.sh first." >&2
+  echo "       Expected env: AMAZING_SEO_DEEP_AUDIT_ENGINE in .bin/.engines.env" >&2
+  exit 1
+fi
+
 TARGET=""
 LIMIT=20
 OUT=""
@@ -41,16 +54,26 @@ DOMAIN=$(echo "$SITEMAP_URL" | sed -E 's|^https?://||; s|/.*||')
 mkdir -p "$OUT"
 
 echo "==> Fetching sitemap: $SITEMAP_URL"
-curl -sf "$SITEMAP_URL" > "$OUT/sitemap.xml" || { echo "FAIL: cannot fetch sitemap" >&2; exit 1; }
+UA="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
+curl -sfL -A "$UA" "$SITEMAP_URL" > "$OUT/sitemap.xml" \
+  || { echo "FAIL: cannot fetch sitemap (HTTP error or blocked)" >&2; exit 1; }
 
-# Extract <loc> entries; if it's an index, follow the first sub-sitemap
+# Extract <loc> entries; if it's an index, aggregate ALL sub-sitemaps
 TOTAL=$(grep -c "<loc>" "$OUT/sitemap.xml" || echo 0)
 echo "    sitemap entries: $TOTAL"
 
 if grep -q "<sitemap>" "$OUT/sitemap.xml"; then
-  echo "    detected sitemap index — following first sub-sitemap"
-  SUB=$(grep -oE "<loc>[^<]+</loc>" "$OUT/sitemap.xml" | head -1 | sed 's|</\?loc>||g')
-  curl -sf "$SUB" > "$OUT/sitemap.xml"
+  SUB_COUNT=$(grep -c "<sitemap>" "$OUT/sitemap.xml")
+  echo "    detected sitemap index with $SUB_COUNT sub-sitemaps — aggregating all"
+  : > "$OUT/sitemap-aggregated.xml"
+  grep -oE "<loc>[^<]+</loc>" "$OUT/sitemap.xml" \
+    | sed -e 's|<loc>||' -e 's|</loc>||' \
+    | while read -r SUB; do
+        echo "      fetching $SUB" >&2
+        curl -sfL -A "$UA" "$SUB" >> "$OUT/sitemap-aggregated.xml" || \
+          echo "      WARN: failed to fetch $SUB" >&2
+      done
+  mv "$OUT/sitemap-aggregated.xml" "$OUT/sitemap.xml"
 fi
 
 # Sample URLs: take first $LIMIT (deterministic — caller can shuffle externally if needed)
@@ -63,13 +86,21 @@ SAMPLE_COUNT=$(wc -l < "$OUT/sample.txt" | tr -d ' ')
 echo "==> Auditing $SAMPLE_COUNT pages (limit=$LIMIT)"
 
 I=0
+FAILED=0
 while read -r URL; do
   I=$((I + 1))
   SLUG=$(echo "$URL" | sed 's|https\?://||; s|[^a-zA-Z0-9]|_|g' | cut -c1-80)
   RESULT="$OUT/page-$(printf '%03d' "$I")-${SLUG}.json"
   echo "  [$I/$SAMPLE_COUNT] $URL"
-  ./.bin/_engine_deep_audit audit "$URL" --format json > "$RESULT" 2>&1 || true
+  if ! ./.bin/_engine_deep_audit audit "$URL" --format json > "$RESULT" 2>&1; then
+    FAILED=$((FAILED + 1))
+    echo "    WARN: engine failed (see $RESULT)" >&2
+  fi
 done < "$OUT/sample.txt"
+
+if [ "$FAILED" -gt 0 ]; then
+  echo "==> $FAILED of $SAMPLE_COUNT page audits failed; aggregated stats below cover only successful ones." >&2
+fi
 
 echo ""
 echo "==> Aggregating scores"

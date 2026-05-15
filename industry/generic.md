@@ -1,4 +1,4 @@
-<!-- Updated: 2026-02-07 -->
+<!-- Updated: 2026-05-15 -->
 # Generic Business SEO Strategy Template
 
 ## Overview

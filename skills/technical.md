@@ -1,13 +1,31 @@
 ---
 name: seo-technical
 description: >
-  Technical SEO audit across 8 categories: crawlability, indexability, security,
-  URL structure, mobile, Core Web Vitals, structured data, and JavaScript
-  rendering. Use when user says "technical SEO", "crawl issues", "robots.txt",
+  Technical SEO audit across 9 categories: crawlability, indexability, security,
+  URL structure, mobile, Core Web Vitals, structured data, JavaScript rendering,
+  and IndexNow. Use when user says "technical SEO", "crawl issues", "robots.txt",
   "Core Web Vitals", "site speed", or "security headers".
 ---
 
 # Technical SEO Audit
+
+## Deterministic checkers — run these first
+
+Before reasoning, run the L1 deterministic checkers for any category they cover.
+Their output is **Confirmed** evidence; reasoning on top is **Likely** at best.
+
+| Category below | Run this checker |
+|----------------|------------------|
+| 1. Crawlability — robots.txt | `scripts/robots_checker.py <domain>` |
+| 1. Crawlability — sitemap | `scripts/sitemap_validator.py <url> --check-robots` |
+| 1. Crawlability — link graph / orphans | `scripts/internal_link_graph.py <seed>` |
+| 1. Crawlability — broken links on page | `scripts/broken_links_checker.py <url>` |
+| 2. Indexability — canonicals / redirects | `scripts/redirect_chain_checker.py <url>` |
+| 2. Indexability — hreflang | `scripts/hreflang_checker.py <url>` |
+| 3. Security — headers + mixed content | `scripts/security_headers_checker.py <url>` |
+| 6. Core Web Vitals | `scripts/psi_checker.py <url>` (set `GOOGLE_PSI_API_KEY`) |
+| 7. Structured data | `scripts/schema_recommended_fields.py <url>` |
+| (all-in-one) | `scripts/page_score.py <url>` — runs every L1 checker above and aggregates |
 
 ## Categories
 

@@ -17,24 +17,25 @@ data-driven growth opportunities — all from a single Claude Code prompt.
 ## What it does
 
 ### Traditional SEO
-- **Full website audits** with parallel sub-agent delegation across 8 categories
-- **Real-browser Core Web Vitals** (LCP, CLS, FCP, TTFB, INP) via Playwright
-- **Schema.org validation** — required AND recommended fields per item, with
-  explicit lists of what's missing (not just counts)
-- **Hreflang / international SEO** — BCP-47, x-default, self-reference,
-  reciprocity validation
-- **Internal link graph analysis** — true-orphan detection, hub mapping,
-  dead-end pages
-- **Multi-page audits** across whole sitemap with statistical aggregation
-- **Sitemap, robots.txt, redirect chains, canonical** validation
-- **Image optimization** — alt text, formats (WebP/AVIF), lazy-loading, CLS
-  prevention
-- **Mobile, URL structure, security headers (HSTS, CSP), accessibility (WCAG)**
+- **Full website audits** via `tools/site_audit.sh` — parallelises per-page audits across sampled sitemap URLs, emits unified Markdown report
+- **Single-page Health Score** via `scripts/page_score.py` — every L1 check on one URL, aggregated 0-100 with prioritized findings
+- **Real Core Web Vitals** via PageSpeed Insights API (CrUX field LCP/INP/CLS/FCP/TTFB at 75th-pct + Lighthouse lab)
+- **Security headers** — HSTS, CSP (with nonce/hash detection), X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, mixed-content scan
+- **Schema.org validation** — required AND recommended fields per item, per-item 0-100 completeness, list of missing field names
+- **Broken-link checker** — every `<a>`, `<link>`, `<script>`, `<img>`, `<source>`, `<iframe>`, CSS bg; splits 4xx vs 5xx vs auth-gated 401/403
+- **Image audit** — alt coverage, format mix (WebP/AVIF vs ≥70% target), width/height for CLS, lazy on below-fold, size flags
+- **Hreflang / international SEO** — BCP-47, x-default, self-reference, parallel reciprocity validation
+- **Internal link graph analysis** — true-orphan detection, hub mapping, dead-end pages
+- **Sitemap validator** — XML validity, sitemap-index recursion, 50k URL / 50 MiB limits, HTTPS-only, lastmod sanity, deprecated tags, sample HTTP-200, robots cross-check
+- **Robots.txt + AI crawlers** — per-bot Allow/Disallow for 20 crawlers (GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, Claude-User, PerplexityBot, Google-Extended, meta-externalagent, Bytespider, etc.)
+- **Redirect chains** — per-hop trace, HTTP→HTTPS upgrade, 301/302 mix, loop detection, canonical alignment
 
 ### AI search optimization (the new layer)
-- **AEO — Answer Engine Optimization.** Live citation testing: query 4 LLM
-  providers (ChatGPT, Perplexity, Claude, Grok) for your target queries and
-  report which providers cite your domain.
+- **AEO — Answer Engine Optimization.** Live citation testing: query 5 LLM
+  surfaces (ChatGPT, Claude, Perplexity, Grok, **and Gemini with Google
+  Search grounding** — the closest publicly-available proxy for Google AI
+  Overviews / AI Mode) for your target queries and report which providers
+  cite your domain.
 - **GEO — Generative Engine Optimization.** Optimize for Google AI Overviews,
   ChatGPT search, Perplexity search, and other generative answer engines.
 - **`llms.txt` validation** — checks existence, structure, AEO-language
@@ -79,7 +80,7 @@ data-driven growth opportunities — all from a single Claude Code prompt.
 | L1 | Python scripts (~10 deterministic checkers) | Reproducible verdicts on robots, hreflang, schema, llms.txt, internal links |
 | L2 | Local CLI engines (configurable) | Real-browser CWV, 251-rule deep audit, live AEO citations |
 | L3 | External APIs (Ahrefs, GSC) | Backlink data, real keyword performance |
-| L4 | Multi-LLM ensemble (Anthropic, OpenAI, Perplexity, xAI) | Live AEO citation testing |
+| L4 | Multi-LLM ensemble (Anthropic, OpenAI, Perplexity, xAI, Google Gemini-with-Search) | Live AEO citation testing across all major AI surfaces |
 
 Each finding carries a confidence label: **Confirmed** (data-backed),
 **Likely** (data + reasoning), **Hypothesis** (reasoning fallback).
@@ -95,6 +96,19 @@ git clone https://github.com/metawhisp/amazing-seo-skill.git \
 
 Then in Claude Code, just say `сделай SEO аудит example.com` or
 `audit https://example.com` and the skill activates via its trigger keywords.
+
+### Check what's active
+
+After install, run the onboarding wizard — it probes prereqs, API keys,
+and runs live smoke tests, then reports which layers (L0-L4) you have:
+
+```bash
+cd ~/.claude/skills/amazing-seo-skill
+./tools/onboarding.sh
+```
+
+See [ONBOARDING.md](ONBOARDING.md) for the full reference: what each layer
+unlocks, how to add API keys, troubleshooting.
 
 ### Full mode (all 4 layers, real CWV + live AEO)
 
@@ -112,14 +126,22 @@ AEO_CITATIONS_ENGINE_CONFIG_FILENAME="<config-filename>" \
 ./install.sh
 ```
 
-For live AEO citation testing across 4 LLM providers, store API keys in
+For live AEO citation testing across 5 LLM surfaces, store API keys in
 macOS Keychain:
 
 ```bash
-security add-generic-password -s anthropic-api-key   -a $USER -w
-security add-generic-password -s openai-api-key      -a $USER -w
-security add-generic-password -s perplexity-api-key  -a $USER -w
-security add-generic-password -s x.ai-api-key        -a $USER -w
+security add-generic-password -s anthropic-api-key      -a $USER -w
+security add-generic-password -s openai-api-key         -a $USER -w
+security add-generic-password -s perplexity-api-key     -a $USER -w
+security add-generic-password -s x.ai-api-key           -a $USER -w
+security add-generic-password -s google-gemini-api-key  -a $USER -w  # Gemini + Google Search grounding (AI Overviews proxy)
+```
+
+For real Core Web Vitals via PageSpeed Insights API (improves rate limit
+from ~25/day keyless to ~25,000/day), also add:
+
+```bash
+security add-generic-password -s google-psi-api-key     -a $USER -w
 ```
 
 ## Usage

@@ -9,9 +9,25 @@ description: >
 
 # Full Website SEO Audit
 
+## Fast path — one command
+
+For most audits, run the site orchestrator (parallelises `page_score.py`
+across N URLs sampled from the sitemap and emits a single Markdown report):
+
+```
+tools/site_audit.sh <domain> --limit 20 > REPORT.md
+tools/site_audit.sh <domain> --limit 50 --no-psi    # faster, no CWV
+```
+
+The report includes overall Health Score, category averages, top recurring
+findings across pages, under-performers (>1σ below mean), and per-page
+summary. Use the detailed process below when you need editorial control or
+specific category deep-dives.
+
 ## Process
 
 1. **Screaming Frog crawl** (FIRST STEP — always run if SF is installed):
+   *External dependency: requires Screaming Frog SEO Spider installed locally. If not installed, skip this step and rely on `scripts/internal_link_graph.py` + WebFetch instead.*
    ```bash
    SF="/Applications/Screaming Frog SEO Spider.app/Contents/MacOS/ScreamingFrogSEOSpiderLauncher"
    timeout 600 "$SF" \
@@ -33,7 +49,7 @@ description: >
    - `seo-sitemap` — structure analysis, quality gates, missing pages
    - `seo-performance` — LCP, INP, CLS measurements
    - `seo-visual` — screenshots, mobile testing, above-fold analysis
-5. **Ahrefs data** (if Ahrefs MCP available — always use when connected):
+6. **Ahrefs data** (if Ahrefs MCP available — always use when connected):
    - `site-explorer-metrics` — DR, organic traffic, keywords count
    - `site-explorer-organic-keywords` — top ranking keywords
    - `site-explorer-top-pages` — pages by traffic
@@ -44,8 +60,8 @@ description: >
    - `keywords-explorer-overview` — keyword difficulty, volume
    - `keywords-explorer-matching-terms` — keyword ideas
    Cross-reference Ahrefs data with SF crawl: pages with traffic but technical issues = priority fixes.
-6. **Score** — aggregate into SEO Health Score (0-100)
-7. **Report** — generate prioritized action plan
+7. **Score** — aggregate into SEO Health Score (0-100)
+8. **Report** — generate prioritized action plan
 
 ## Crawl Configuration
 

@@ -1,5 +1,9 @@
-<!-- Updated: 2026-02-07 -->
-# Schema.org Types — Status & Recommendations (February 2026)
+<!-- Updated: 2026-05-15 -->
+# Schema.org Types — Status & Recommendations (May 2026)
+
+> Status table below was last fully audited Feb 2026. Schema deprecation
+> policy moves quarterly — re-check Google's docs before relying on items
+> marked "deprecated" or "restricted" if more than 90 days have passed.
 
 **Schema.org Version:** 29.4 (December 8, 2025)
 

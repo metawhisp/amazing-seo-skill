@@ -30,13 +30,22 @@ from typing import Any
 import requests
 from bs4 import BeautifulSoup
 
+from _fetch import fetch as _fetch_url
+
 
 # ── Required fields (rich-result eligibility) ──────────────────────────────
+#
+# Article / BlogPosting / NewsArticle: per Google's Article rich-result docs,
+# `headline` is the only strictly required property. `image`, `author`,
+# `datePublished`, `dateModified` are *strongly recommended* — without them
+# the rich result won't show — but they don't fail spec-level validation.
+# Treat them as RECOMMENDED so we don't flag a P0 (blocked) on plain articles
+# that intentionally omit hero images.
 REQUIRED = {
-    "Article":         ["headline", "author", "datePublished", "image"],
-    "BlogPosting":     ["headline", "author", "datePublished", "image"],
-    "NewsArticle":     ["headline", "author", "datePublished", "image"],
-    "Product":         ["name", "image", "offers"],
+    "Article":         ["headline"],
+    "BlogPosting":     ["headline"],
+    "NewsArticle":     ["headline"],
+    "Product":         ["name"],
     "Offer":           ["price", "priceCurrency", "availability"],
     "Organization":    ["name", "url"],
     "LocalBusiness":   ["name", "address", "telephone"],
@@ -131,10 +140,7 @@ RECOMMENDED = {
 
 
 def fetch(url: str, timeout: int = 15):
-    return requests.get(
-        url, timeout=timeout, allow_redirects=True,
-        headers={"User-Agent": "amazing-seo-skill/schema-checker"},
-    )
+    return _fetch_url(url, timeout=timeout)
 
 
 def extract_jsonld_blocks(html: str) -> list[dict | list]:

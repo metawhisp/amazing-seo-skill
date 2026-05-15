@@ -31,6 +31,8 @@ from urllib.parse import urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 
+from _fetch import fetch
+
 
 def normalize_url(url: str) -> str:
     p = urlparse(url)
@@ -38,13 +40,6 @@ def normalize_url(url: str) -> str:
     if path != "/" and path.endswith("/"):
         path = path.rstrip("/")
     return f"{p.scheme}://{p.netloc}{path}"
-
-
-def fetch(url: str, timeout: int = 15):
-    return requests.get(
-        url, timeout=timeout, allow_redirects=True,
-        headers={"User-Agent": "amazing-seo-skill/link-graph"},
-    )
 
 
 def extract_links(html: str, base_url: str, host: str) -> list[str]:

@@ -1,5 +1,5 @@
-<!-- Updated: 2026-02-07 -->
-# Google SEO Quick Reference (February 2026)
+<!-- Updated: 2026-05-15 -->
+# Google SEO Quick Reference (May 2026)
 
 Concise reference guide for subagents. Summarizes key Google Search concepts,
 requirements, and best practices. Not a reproduction of Google's documentation —

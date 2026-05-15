@@ -1,21 +1,17 @@
 ---
 name: amazing-seo-skill
 description: >
-  Comprehensive SEO + AEO + GEO analysis skill for any website or business type
-  (SaaS, e-commerce, local service, publisher, agency). Performs full website
-  audits, single-page deep analysis, technical SEO checks (crawlability,
-  indexability, Core Web Vitals with INP, JS-rendering diff), schema markup
-  detection/validation/generation, content quality assessment with E-E-A-T
-  framework, image optimization, sitemap analysis, hreflang/i18n validation,
-  programmatic SEO planning, competitor comparison page generation, and
-  Generative/Answer Engine Optimization (AI Overviews, ChatGPT, Perplexity,
-  Claude citations). Detects business type and applies industry-specific
-  thresholds. Uses 4-layer data model: LLM reasoning, deterministic Python
-  checkers, real-browser CWV measurement, multi-LLM ensemble cross-validation
-  via Anthropic + OpenAI + Perplexity + xAI APIs. Triggers on: "SEO", "audit",
-  "schema", "Core Web Vitals", "INP", "sitemap", "E-E-A-T", "AI Overviews",
-  "GEO", "AEO", "technical SEO", "content quality", "page speed", "structured
-  data", "hreflang", "programmatic SEO", "competitor pages".
+  SEO + AEO + GEO analysis for any website (SaaS, e-commerce, local, publisher,
+  agency). Full-site audits, single-page deep-dive, technical SEO (crawl,
+  index, CWV with INP, JS-rendering), Schema.org detection/validation/gen,
+  E-E-A-T content quality, image optimization, sitemap, hreflang, programmatic
+  SEO, competitor pages, and Generative/Answer Engine Optimization (AI
+  Overviews, ChatGPT, Perplexity, Claude, Gemini citations). Detects business
+  type, applies industry thresholds. 4-layer model: reasoning, deterministic
+  Python checkers, real-browser CWV, 5-LLM citation ensemble. Triggers on:
+  "SEO", "audit", "schema", "Core Web Vitals", "INP", "sitemap", "E-E-A-T",
+  "AI Overviews", "GEO", "AEO", "technical SEO", "hreflang", "programmatic
+  SEO", "competitor pages".
 allowed-tools:
   - Read
   - Grep
@@ -31,19 +27,26 @@ Single entry-point orchestrator for end-to-end SEO/AEO/GEO analysis across all
 industries. Combines reasoning, deterministic checkers, real-browser
 measurement, and multi-LLM cross-validation into one unified workflow.
 
+> **First time setup?** Tell the user: "Run `./tools/onboarding.sh` in the
+> skill directory — it shows which capability layers (L0-L4) are active on
+> this machine and lists the API keys needed to unlock the rest." See also
+> `ONBOARDING.md` for the full reference.
+
 ## Quick Reference
 
 | Command | What it does |
 |---------|--------------|
-| `audit <url>` | Full website audit, all layers, parallel sub-agents, Health Score |
-| `page <url>` | Deep single-page analysis |
-| `technical <url>` | Technical SEO across 8 categories |
+| `audit <domain>` | Full website audit, parallel sub-agents, site-wide Health Score. Delegates to `tools/site_audit.sh` for multi-page parallelism. |
+| `page <url>` | Single-page deep-dive. Runs every L1 checker on one URL, aggregates into 0-100 Health Score with prioritized findings. Calls `scripts/page_score.py`. |
+| `technical <url>` | Technical SEO across 9 categories (robots/sitemap/security/redirects/CWV) |
 | `content <url>` | Content quality + E-E-A-T evaluation |
 | `schema <url>` | Detect, validate, generate Schema.org markup |
-| `images <url>` | Image optimization analysis |
+| `images <url>` | Image optimization (alt, format, dims, lazy, size) |
+| `links <url>` | Broken-link audit (4xx + 5xx + auth-gated) |
+| `security <url>` | Security-headers audit (HSTS, CSP, XFO, mixed content) |
 | `sitemap <url \| generate>` | Analyze or generate XML sitemaps |
 | `geo <url>` | AI Overviews / Generative Engine Optimization |
-| `aeo <url> [keyword]` | Live AEO citation check (4-LLM ensemble) |
+| `aeo <url> [keyword]` | Live AEO citation check (5-LLM ensemble inc. Gemini) |
 | `plan <industry>` | Strategic SEO plan from industry template |
 | `programmatic [url \| plan]` | Programmatic SEO analysis or planning |
 | `competitor-pages [url \| generate]` | Competitor comparison page generation |
@@ -55,13 +58,15 @@ measurement, and multi-LLM cross-validation into one unified workflow.
 | Layer | Source | When to use |
 |-------|--------|-------------|
 | L0 | Claude reasoning + WebFetch | Analysis, prioritization, recommendations |
-| L1 | Python scripts in `scripts/` | Deterministic checkers (robots, hreflang, schema, llms.txt) |
+| L1 | Python scripts in `scripts/` | Deterministic checkers: robots, sitemap, hreflang, schema, llms.txt, redirect chains, internal link graph, PSI/CWV |
 | L2 | Local CLIs in `.bin/` | 251-rule deep audit + real-browser CWV; live AEO citations |
 | L3 | External APIs | Ahrefs MCP, Google Search Console |
-| L4 | Multi-LLM ensemble | Cross-validation via 4 LLM providers (anthropic, openai, perplexity, xai) |
+| L4 | Multi-LLM ensemble | Cross-validation via 5 LLM providers (anthropic, openai, perplexity, xai, gemini-with-search-grounding) |
 
 API keys for L4 are read from macOS Keychain at runtime:
-`anthropic-api-key`, `openai-api-key`, `perplexity-api-key`, `x.ai-api-key`.
+`anthropic-api-key`, `openai-api-key`, `perplexity-api-key`, `x.ai-api-key`,
+`google-gemini-api-key` (the latter enables a Gemini-with-Google-Search
+probe that closes the Google AI Overviews / AI Mode gap).
 Retrieve with `security find-generic-password -s <name> -w`.
 
 ## Orchestration Logic
@@ -119,6 +124,41 @@ Load these on-demand as needed — do NOT load all at startup:
 - `industry/<type>.md` — Industry template for detected business type
 - `docs/google-seo-reference.md` — Google search documentation reference
 
+## Deterministic Checkers (L1)
+
+Lightweight Python scripts in `scripts/`. Each runs standalone, outputs JSON,
+returns a meaningful exit code (0 = clean, 1 = fetch failed, 2 = issues found),
+and is wired through `scripts/_fetch.py` (realistic Chrome UA, SSRF guard,
+retries). Use these for **Confirmed** findings; falling back to L0 reasoning
+only when the relevant checker can't reach the target.
+
+| Checker | What it verifies | Notes |
+|---------|------------------|-------|
+| `robots_checker.py <domain>` | robots.txt: structure, sitemap refs, per-bot Allow/Disallow for 20 crawlers (GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, Claude-User, PerplexityBot, Google-Extended, meta-externalagent, Bytespider, etc.) | Recommends 301 vs 302 for upgrades |
+| `sitemap_validator.py <url>` | XML validity, sitemap-index recursion, URL count vs 50k limit, HTTPS-only, lastmod sanity, deprecated `<priority>`/`<changefreq>`, sample HTTP-200 check, robots.txt cross-reference | `--sample N` configurable |
+| `redirect_chain_checker.py <url>` | per-hop redirect trace, HTTP→HTTPS upgrade, 301 vs 302 mix, loop detection, canonical alignment on final URL | Hop count ≥ 3 flagged |
+| `security_headers_checker.py <url>` | HSTS (max-age, includeSubDomains, preload), CSP (unsafe-inline / nonce / hash), X-Frame-Options or CSP frame-ancestors, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, mixed-content scan | Page Experience signals |
+| `broken_links_checker.py <url>` | Per-page link audit: every `<a>`, `<link>`, `<script>`, `<img>`, `<source>`, `<iframe>`, CSS background. Concurrent HEAD with GET fallback. Splits 4xx vs 5xx vs auth-gated 401/403 (separate bucket — soft signal) | `--max-links`, `--internal-only` |
+| `images_audit.py <url>` | Alt-text coverage, format mix (WebP/AVIF/JPEG/PNG/SVG) with next-gen target ≥70%, width/height dims for CLS, lazy-loading on below-fold, size flags ≥200KB/≥500KB | `--no-size-probe` for fast mode |
+| `hreflang_checker.py <url>` | BCP-47 codes, x-default, self-reference, reciprocity (parallel) | `--check-reciprocity` |
+| `schema_recommended_fields.py <url>` | Per-schema-item required vs recommended field coverage; per-item completeness 0-100 | Article: per Google "no required fields" |
+| `llms_txt_checker.py <domain>` | llms.txt existence, structure, link-validity (HEAD probe of referenced URLs), AEO-language heuristics | `--skip-links` for fast mode |
+| `internal_link_graph.py <seed>` | Crawl-built adjacency: true orphans (sitemap not linked), sitemap gaps, depth-4+ pages, hub pages, dead-ends | `--max-pages`, `--max-depth` |
+| `psi_checker.py <url>` | PageSpeed Insights API v5: field CrUX (LCP/INP/CLS/FCP/TTFB at 75th percentile) + lab Lighthouse | API key from env `GOOGLE_PSI_API_KEY` or Keychain `google-psi-api-key` |
+| `aeo_gemini.py <domain> "<query>" …` | Gemini-with-Google-Search-grounding probe: does the LLM cite the target domain when answering each query? Proxy for Google AI Overviews / AI Mode | Needs `google-gemini-api-key` |
+| `page_score.py <url>` | **Orchestrator**: runs all of the above L1 checkers on one URL in parallel, aggregates into 0-100 Health Score with category breakdown + prioritized findings. JSON or Markdown output. | `--format markdown\|json`, `--no-psi` |
+| `parse_html.py <file>` | Extract title/meta/headings/canonical/hreflang/images/links/schema/word-count from saved HTML | Used internally by `page_score.py` |
+| `fetch_page.py <url>` | Standalone fetcher with SSRF guard; saves HTML to disk for offline analysis | Pre-stage for `parse_html.py` |
+
+### Site-level orchestrator
+
+| Tool | What it does |
+|------|--------------|
+| `tools/site_audit.sh <domain> --limit N` | Fetches sitemap (aggregates sitemap-index), samples N URLs, runs `page_score.py` on each in parallel, aggregates into a site-wide Markdown report with: overall Health Score, category averages, top recurring findings across pages, under-performers list, per-page summary. |
+| `tools/onboarding.sh` | Probes prereqs / engines / API keys / runs smoke tests. Tells the user which layers (L0-L4) are active. Run after install. |
+| `tools/multi-page-audit.sh <domain>` | Engine-based (L2) multi-page audit using the deep-audit engine. Use when L2 is configured. |
+| `tools/aeo-citations.sh <domain> "<query>" …` | 5-LLM ensemble citation probe (anthropic, openai, perplexity, xai, gemini-with-grounding). |
+
 ## Modules (sub-skills)
 
 Each module is a self-contained sub-skill in `skills/*.md`. Load only the
@@ -128,7 +168,7 @@ relevant ones for the current task:
 |--------|------|-------|
 | Audit orchestrator | `skills/audit.md` | Full website audit with parallel delegation |
 | Page deep-dive | `skills/page.md` | Single-page analysis |
-| Technical SEO | `skills/technical.md` | 8 technical categories |
+| Technical SEO | `skills/technical.md` | 9 technical categories |
 | Content quality | `skills/content.md` | E-E-A-T + readability |
 | Schema markup | `skills/schema.md` | Detection, validation, generation |
 | Image optimization | `skills/images.md` | Alt text, formats, lazy-loading |
