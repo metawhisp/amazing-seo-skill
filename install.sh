@@ -104,5 +104,8 @@ echo ''
 echo "For real-browser CWV via PageSpeed Insights API (raises rate limit):"
 echo '    security add-generic-password -s google-psi-api-key     -a $USER -w'
 echo ''
+echo "For live SERP data (top-10, AI Overview citations, optional layer):"
+echo '    security add-generic-password -s serpapi-key            -a $USER -w  # free 100/mo at serpapi.com'
+echo ''
 echo "==> Now run ./tools/onboarding.sh — it reports which layers are active"
 echo "    and what's missing on your machine. Re-run any time."

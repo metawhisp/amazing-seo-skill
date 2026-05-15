@@ -47,16 +47,20 @@ PY = sys.executable  # whoever launched us — likely .venv/bin/python
 
 
 # Each checker: (key, script_filename, category, weight, default_args)
+# Weights sum to 100. Content + CMS added in v0.4; on_page (parse_html) is now
+# weight 0 (used as informational input only, not scored).
 CHECKERS = [
-    ("redirects",  "redirect_chain_checker.py",  "technical", 12,  []),
-    ("security",   "security_headers_checker.py","technical", 13,  []),
+    ("redirects",  "redirect_chain_checker.py",  "technical", 10,  []),
+    ("security",   "security_headers_checker.py","technical", 10,  []),
     ("schema",     "schema_recommended_fields.py","schema",   15,  []),
     ("images",     "images_audit.py",            "images",    15,  ["--no-size-probe"]),
     ("links",      "broken_links_checker.py",    "links",     15,  ["--max-links", "60"]),
     ("psi",        "psi_checker.py",             "cwv",       15,  []),
+    ("content",    "content_quality.py",         "content",   10,  []),
     ("hreflang",   "hreflang_checker.py",        "geo",        5,  []),
     ("llms",       "llms_txt_checker.py",        "geo",        5,  ["--skip-links"]),
-    ("html",       "parse_html.py",              "on_page",    5,  ["--json"]),
+    ("cms",        "cms_detector.py",            "platform",   0,  []),  # informational
+    ("html",       "parse_html.py",              "on_page",    0,  ["--json"]),  # informational
 ]
 
 
@@ -249,12 +253,18 @@ def render_markdown(target: str, summary: dict, results: list[dict]) -> str:
         "|----------|-------|----------|",
     ]
     for cat, agg in sorted(summary["by_category"].items()):
+        checkers = agg["checkers"]
+        ran_checkers = [c for c in checkers if not c.get("skipped")]
         if agg["score"] is None:
-            lines.append(f"| {cat} | — (skipped) | {len(agg['checkers'])} |")
+            if ran_checkers:
+                # Weight-0 informational checkers (CMS, parse_html)
+                cks = ", ".join(c["key"] for c in ran_checkers)
+                lines.append(f"| {cat} | informational | {cks} |")
+            else:
+                lines.append(f"| {cat} | — (skipped) | {len(checkers)} |")
         else:
             cks = ", ".join(
-                f"{c['key']} {c['sub_score']}" for c in agg["checkers"]
-                if not c.get("skipped")
+                f"{c['key']} {c['sub_score']}" for c in ran_checkers
             )
             lines.append(f"| {cat} | {agg['score']}/100 | {cks} |")
 

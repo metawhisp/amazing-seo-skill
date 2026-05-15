@@ -135,6 +135,7 @@ probe_key perplexity-api-key     "Perplexity"                "Perplexity AEO cit
 probe_key x.ai-api-key           "xAI (Grok)"                "Grok AEO citation probe"
 probe_key google-gemini-api-key  "Google Gemini"             "Gemini + Google Search grounding — proxies AI Overviews / AI Mode"
 probe_key google-psi-api-key     "Google PageSpeed Insights" "Real CrUX/Lighthouse CWV at scale (rate limit: 25k/day vs 25/day keyless)"
+probe_key serpapi-key            "SerpAPI"                   "Live SERP data (top-10, features, AI Overview citation check)"
 
 # ── Smoke tests of L1 deterministic checkers ─────────────────────────────
 header "5. L1 deterministic-checker smoke tests (live HTTP)"
@@ -185,7 +186,7 @@ header "6. Active capability layers"
 [ "$L2_ACTIVE" = 1 ] && ok "L2 (engines: deep-audit + AEO citations)" || warn "L2 — engines not configured"
 ok "L3 (Ahrefs MCP / GSC) — $L3_HINT"
 if [ "${#L4_PROVIDERS[@]}" -gt 0 ]; then
-  ok "L4 (LLM ensemble) — ${#L4_PROVIDERS[@]}/6 providers: ${L4_PROVIDERS[*]}"
+  ok "L4 (LLM ensemble + data layer) — ${#L4_PROVIDERS[@]}/7 keys: ${L4_PROVIDERS[*]}"
 else
   warn "L4 (LLM ensemble) — no provider keys yet"
 fi

@@ -38,8 +38,14 @@ measurement, and multi-LLM cross-validation into one unified workflow.
 |---------|--------------|
 | `audit <domain>` | Full website audit, parallel sub-agents, site-wide Health Score. Delegates to `tools/site_audit.sh` for multi-page parallelism. |
 | `page <url>` | Single-page deep-dive. Runs every L1 checker on one URL, aggregates into 0-100 Health Score with prioritized findings. Calls `scripts/page_score.py`. |
+| `ai_visibility <url>` | Composite AI Visibility Score (0-100) — AI crawler access + SSR + schema + llms.txt + hreflang + live citations. |
+| `cms <url>` | Detect CMS / framework (24+ platforms) and get platform-specific SEO tips |
+| `js_render <url>` | Compare raw HTML vs JS-rendered HTML — critical for SPA SEO |
+| `logs <log_file>` | Parse server access logs: bot behavior, crawl waste, error spikes, sitemap cross-check |
+| `content <url>` | Content quality + Flesch + E-E-A-T markers + citable-passage extraction |
+| `local <url>` | Local-SEO audit: NAP, LocalBusiness schema, GBP, citations |
+| `serp "<query>"` | SerpAPI: top-10 organic, SERP features, AI Overview, target-domain position |
 | `technical <url>` | Technical SEO across 9 categories (robots/sitemap/security/redirects/CWV) |
-| `content <url>` | Content quality + E-E-A-T evaluation |
 | `schema <url>` | Detect, validate, generate Schema.org markup |
 | `images <url>` | Image optimization (alt, format, dims, lazy, size) |
 | `links <url>` | Broken-link audit (4xx + 5xx + auth-gated) |
@@ -47,6 +53,8 @@ measurement, and multi-LLM cross-validation into one unified workflow.
 | `sitemap <url \| generate>` | Analyze or generate XML sitemaps |
 | `geo <url>` | AI Overviews / Generative Engine Optimization |
 | `aeo <url> [keyword]` | Live AEO citation check (5-LLM ensemble inc. Gemini) |
+| `history {store\|list\|diff\|trend}` | SQLite audit history — store runs, compare over time |
+| `report <json_file>` | Render page_score JSON → styled HTML report |
 | `plan <industry>` | Strategic SEO plan from industry template |
 | `programmatic [url \| plan]` | Programmatic SEO analysis or planning |
 | `competitor-pages [url \| generate]` | Competitor comparison page generation |
@@ -146,7 +154,16 @@ only when the relevant checker can't reach the target.
 | `internal_link_graph.py <seed>` | Crawl-built adjacency: true orphans (sitemap not linked), sitemap gaps, depth-4+ pages, hub pages, dead-ends | `--max-pages`, `--max-depth` |
 | `psi_checker.py <url>` | PageSpeed Insights API v5: field CrUX (LCP/INP/CLS/FCP/TTFB at 75th percentile) + lab Lighthouse | API key from env `GOOGLE_PSI_API_KEY` or Keychain `google-psi-api-key` |
 | `aeo_gemini.py <domain> "<query>" …` | Gemini-with-Google-Search-grounding probe: does the LLM cite the target domain when answering each query? Proxy for Google AI Overviews / AI Mode | Needs `google-gemini-api-key` |
-| `page_score.py <url>` | **Orchestrator**: runs all of the above L1 checkers on one URL in parallel, aggregates into 0-100 Health Score with category breakdown + prioritized findings. JSON or Markdown output. | `--format markdown\|json`, `--no-psi` |
+| `cms_detector.py <url>` | Identifies platform from body / headers / generator meta (WordPress, Shopify, Webflow, Wix, Squarespace, Ghost, Drupal, Magento, HubSpot, BigCommerce, Next.js, Nuxt, Gatsby, Hugo, Astro, etc.) + tailored SEO tips for that platform. | 24+ platforms covered |
+| `js_rendering_diff.py <url>` | Server-rendered HTML vs Playwright-rendered HTML structural diff: canonical/robots/title/meta/schema/word-count/hreflang. P0 flags when canonical or schema only in rendered (AI crawlers + Googlebot indexing delay) | Requires Playwright Chromium |
+| `log_analyzer.py <log_file>` | Parses Apache/Nginx access logs (incl `.gz`): per-bot breakdown (Googlebot, GPTBot, ClaudeBot, PerplexityBot, etc.), crawl-waste detection (UTM, fbclid, feeds, parameter explosions), 4xx/5xx spike days, sitemap cross-check (orphans + cold pages). | `--sitemap`, `--days N` |
+| `content_quality.py <url>` | Word count vs page-type baseline, Flesch reading ease, avg sentence/paragraph length, keyword density (stuffing detection at >5%), AI-generation marker phrases, 134-200 word citable-passage extraction, author byline + dates (E-E-A-T). | `--page-type blog\|service\|home` |
+| `local_seo_checker.py <url>` | NAP discoverability (Name + Address + Phone), LocalBusiness schema required+recommended fields, Google Maps embed, GBP / Yelp / BBB / Facebook citations, NAP consistency (schema vs visible page text). | Use for local-intent pages |
+| `ai_visibility_score.py <url>` | Composite 0-100 AI Visibility Score across 6 components (AI crawler accessibility, SSR completeness, Schema, llms.txt, hreflang, live Gemini citation rate). Verdict + per-component breakdown. | Optional live Gemini probe with `--queries` |
+| `audit_history.py {store\|list\|diff\|trend\|prune}` | SQLite-backed audit history. Stores page_score JSON, computes score trends over time, diffs two runs (findings added vs removed), prunes old runs. | DB at `~/.amazing-seo-skill/history.db` |
+| `serpapi_integration.py "<query>"` | Optional SERP layer via SerpAPI: top-10 organic, SERP features (AI Overview, Featured Snippet, PAA, Knowledge Panel, Local Pack), target-domain position, AI Overview citation check, People Also Ask. | Needs `SERPAPI_KEY` or Keychain `serpapi-key` |
+| `render_html_report.py < page_score.json` | Renders a `page_score.py --format json` into a self-contained styled HTML report. Dark theme, severity-coloured findings, category cards, score gauge. | Pipe page_score JSON in |
+| `page_score.py <url>` | **Single-page orchestrator**: runs every applicable L1 checker on one URL in parallel, aggregates into 0-100 Health Score with category breakdown + prioritized findings. JSON or Markdown output. | `--format markdown\|json`, `--no-psi` |
 | `parse_html.py <file>` | Extract title/meta/headings/canonical/hreflang/images/links/schema/word-count from saved HTML | Used internally by `page_score.py` |
 | `fetch_page.py <url>` | Standalone fetcher with SSRF guard; saves HTML to disk for offline analysis | Pre-stage for `parse_html.py` |
 

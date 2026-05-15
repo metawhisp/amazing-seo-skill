@@ -19,11 +19,19 @@ data-driven growth opportunities — all from a single Claude Code prompt.
 ### Traditional SEO
 - **Full website audits** via `tools/site_audit.sh` — parallelises per-page audits across sampled sitemap URLs, emits unified Markdown report
 - **Single-page Health Score** via `scripts/page_score.py` — every L1 check on one URL, aggregated 0-100 with prioritized findings
+- **HTML visual report** via `scripts/render_html_report.py` — styled standalone HTML for stakeholder sharing
+- **Audit history** via `scripts/audit_history.py` — SQLite store, score trends, diff between runs
+- **CMS / framework detection** — 24+ platforms (WordPress, Shopify, Webflow, Wix, Squarespace, Ghost, Drupal, Magento, HubSpot, BigCommerce, Next.js, Nuxt, Gatsby, Hugo, Astro, ...) with tailored SEO tips per platform
+- **JS rendering diff** — server-side HTML vs Playwright-rendered HTML structural comparison (canonical/robots/title/meta/schema deltas). Critical for SPA SEO
+- **Server log analysis** — Apache/Nginx logs (incl `.gz`): bot breakdown, crawl waste, error spikes, sitemap orphans/cold pages
 - **Real Core Web Vitals** via PageSpeed Insights API (CrUX field LCP/INP/CLS/FCP/TTFB at 75th-pct + Lighthouse lab)
 - **Security headers** — HSTS, CSP (with nonce/hash detection), X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, mixed-content scan
 - **Schema.org validation** — required AND recommended fields per item, per-item 0-100 completeness, list of missing field names
 - **Broken-link checker** — every `<a>`, `<link>`, `<script>`, `<img>`, `<source>`, `<iframe>`, CSS bg; splits 4xx vs 5xx vs auth-gated 401/403
 - **Image audit** — alt coverage, format mix (WebP/AVIF vs ≥70% target), width/height for CLS, lazy on below-fold, size flags
+- **Content quality** — Flesch reading ease, sentence/paragraph length, keyword stuffing detection, AI-generation marker phrases, 134-200 word citable-passage extraction for AI Overviews, author byline + dates
+- **Local SEO** — NAP discoverability, LocalBusiness schema fields, Google Maps embed, GBP / Yelp / BBB citations, NAP consistency
+- **SerpAPI integration** (optional) — top-10 organic, SERP features, AI Overview citation check
 - **Hreflang / international SEO** — BCP-47, x-default, self-reference, parallel reciprocity validation
 - **Internal link graph analysis** — true-orphan detection, hub mapping, dead-end pages
 - **Sitemap validator** — XML validity, sitemap-index recursion, 50k URL / 50 MiB limits, HTTPS-only, lastmod sanity, deprecated tags, sample HTTP-200, robots cross-check
@@ -31,6 +39,7 @@ data-driven growth opportunities — all from a single Claude Code prompt.
 - **Redirect chains** — per-hop trace, HTTP→HTTPS upgrade, 301/302 mix, loop detection, canonical alignment
 
 ### AI search optimization (the new layer)
+- **AI Visibility Score** via `scripts/ai_visibility_score.py` — composite 0-100 across 6 components (AI crawler accessibility, SSR completeness, schema, llms.txt, hreflang, live Gemini citations)
 - **AEO — Answer Engine Optimization.** Live citation testing: query 5 LLM
   surfaces (ChatGPT, Claude, Perplexity, Grok, **and Gemini with Google
   Search grounding** — the closest publicly-available proxy for Google AI
