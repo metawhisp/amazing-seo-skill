@@ -21,6 +21,7 @@ data-driven growth opportunities — all from a single Claude Code prompt.
 - **Full website audits** via `tools/site_audit.sh` — parallelises per-page audits across sampled sitemap URLs, emits unified Markdown report
 - **Single-page Health Score** via `scripts/page_score.py` — every L1 check on one URL, aggregated 0-100 with prioritized findings
 - **HTML visual report** via `scripts/render_html_report.py` — styled standalone HTML for stakeholder sharing
+- **Static dashboard** via `scripts/build_dashboard.py` + `tools/serve_dashboard.sh` — multi-domain overview with trend sparklines, runs history, drillable run-detail pages. No backend, no daemon, no cloud — opens locally or deploys to any static host.
 - **Audit history** via `scripts/audit_history.py` — SQLite store, score trends, diff between runs
 - **CMS / framework detection** — 24+ platforms (WordPress, Shopify, Webflow, Wix, Squarespace, Ghost, Drupal, Magento, HubSpot, BigCommerce, Next.js, Nuxt, Gatsby, Hugo, Astro, ...) with tailored SEO tips per platform
 - **JS rendering diff** — server-side HTML vs Playwright-rendered HTML structural comparison (canonical/robots/title/meta/schema deltas). Critical for SPA SEO

@@ -58,6 +58,7 @@ labelled "Confirmed"** because they're data-backed.
 | `parse_html.py` | Extract title/meta/headings/canonical/hreflang/images/links/schema from saved HTML |
 | `fetch_page.py` | Standalone fetcher with SSRF guard; saves HTML to disk for offline analysis |
 | `amazing_crawl.py` | Open-source async crawler — SF alternative when SF isn't installed or you exceed the 500-URL free tier. Captures status/title/meta/canonical/H1/schema/links per URL into SQLite, resumes from checkpoint, exports CSV/JSON |
+| `build_dashboard.py` | Generates static HTML dashboard from `audit_history.db`: per-domain trends, recurring P0/P1 issues, drillable run-detail pages. Pair with `tools/serve_dashboard.sh` to serve on `localhost:8080`. |
 | `page_score.py` | **All-in-one orchestrator** — runs every checker above in parallel, aggregates to 0-100 Health Score with prioritized findings |
 
 **Requires:** `./install.sh` (or manual `.venv` setup with

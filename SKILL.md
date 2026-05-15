@@ -54,6 +54,8 @@ measurement, and multi-LLM cross-validation into one unified workflow.
 | `geo <url>` | AI Overviews / Generative Engine Optimization |
 | `aeo <url> [keyword]` | Live AEO citation check (5-LLM ensemble inc. Gemini) |
 | `history {store\|list\|diff\|trend}` | SQLite audit history — store runs, compare over time |
+| `dashboard` | Build static HTML dashboard from history.db |
+| `serve_dashboard [PORT]` | Serve dashboard on `localhost:8080` |
 | `report <json_file>` | Render page_score JSON → styled HTML report |
 | `plan <industry>` | Strategic SEO plan from industry template |
 | `programmatic [url \| plan]` | Programmatic SEO analysis or planning |
@@ -174,6 +176,8 @@ only when the relevant checker can't reach the target.
 | `tools/site_audit.sh <domain> --limit N` | Fetches sitemap (aggregates sitemap-index), samples N URLs, runs `page_score.py` on each in parallel, aggregates into a site-wide Markdown report with: overall Health Score, category averages, top recurring findings across pages, under-performers list, per-page summary. |
 | `tools/crawl.sh <url> [--max-pages N]` | **Smart crawler dispatcher**: auto-selects between Screaming Frog (if installed, ≤500 URLs) and our own **amazing-crawl** (async Python, unlimited URLs). Override with `--force-sf` / `--force-amazing`. |
 | `scripts/amazing_crawl.py <url> --max-pages N --concurrency K` | Open-source async crawler — SF alternative when SF isn't available or you hit the 500-URL free-tier cap. Captures status/title/meta/canonical/H1/schema/word-count/links/images per URL into SQLite, resumes from checkpoint, exports CSV/JSON. |
+| `scripts/build_dashboard.py` | **Static-HTML dashboard generator** from `audit_history.db`: per-domain trends (inline SVG sparklines), score deltas, top recurring P0/P1 findings across all tracked domains, drillable run-detail pages. Self-contained — open `dashboard/index.html` directly or serve via `tools/serve_dashboard.sh`. |
+| `tools/serve_dashboard.sh [PORT]` | Spins up `python -m http.server` on the dashboard folder. Optional port (default 8080). |
 | `tools/onboarding.sh` | Probes prereqs / engines / API keys / runs smoke tests. Tells the user which layers (L0-L4) are active. Run after install. |
 | `tools/multi-page-audit.sh <domain>` | Engine-based (L2) multi-page audit using the deep-audit engine. Use when L2 is configured. |
 | `tools/aeo-citations.sh <domain> "<query>" …` | 5-LLM ensemble citation probe (anthropic, openai, perplexity, xai, gemini-with-grounding). |
