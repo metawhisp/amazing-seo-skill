@@ -168,8 +168,15 @@ def main() -> int:
             "urls": dead_ends[:30],
         },
     }
+    # Exit code: 2 if findings (orphans, sitemap gaps, dead-ends),
+    # 0 if clean. Consistent with other checkers.
+    has_issues = (
+        len(true_orphans) > 0
+        or len(sitemap_gaps) > 0
+        or len(dead_ends) > 0
+    )
     print(json.dumps(out, indent=2, ensure_ascii=False))
-    return 0
+    return 2 if has_issues else 0
 
 
 if __name__ == "__main__":

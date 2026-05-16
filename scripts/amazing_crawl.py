@@ -72,6 +72,8 @@ from urllib.parse import urljoin, urlparse, urldefrag
 import httpx
 from bs4 import BeautifulSoup
 
+from _fetch import _check_ssrf, SSRFBlocked
+
 
 _DEFAULT_UA = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
@@ -249,12 +251,19 @@ async def _fetch_one(
     url: str,
     js_render: bool,
 ) -> tuple[httpx.Response | None, float, str | None]:
-    """Fetch URL with timing. Return (response, ms, error)."""
+    """Fetch URL with timing + SSRF guard. Return (response, ms, error)."""
     t0 = time.monotonic()
     try:
+        # SSRF guard — reject private / loopback / link-local / reserved IPs
+        # before we ever open the socket. Without this, a crawler following
+        # links could end up hitting AWS metadata (169.254.169.254), internal
+        # services, etc. when run on shared / cloud infra.
+        _check_ssrf(url)
         r = await client.get(url, timeout=20, follow_redirects=True,
                              headers={"User-Agent": _DEFAULT_UA})
         return r, (time.monotonic() - t0) * 1000, None
+    except SSRFBlocked as e:
+        return None, (time.monotonic() - t0) * 1000, f"SSRF blocked: {e}"
     except httpx.HTTPError as e:
         return None, (time.monotonic() - t0) * 1000, str(e)[:200]
 
@@ -373,12 +382,17 @@ async def _crawl(
                 ))
                 db.execute("DELETE FROM queue WHERE url=?", (url,))
 
-                # Enqueue discovered internal links
+                # Enqueue discovered internal links — SSRF-filter before queue
                 if depth < max_depth:
                     for child in parsed["_discovered_links"]:
                         if child in visited or child in queued:
                             continue
                         if not _is_same_host(seed_host, child):
+                            continue
+                        try:
+                            _check_ssrf(child)
+                        except SSRFBlocked:
+                            visited.add(child)  # mark as visited to skip
                             continue
                         await queue.put((child, depth + 1))
                         queued.add(child)

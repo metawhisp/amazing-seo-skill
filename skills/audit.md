@@ -83,15 +83,18 @@ Delay between requests: 1 second
 
 ## Scoring Weights
 
-| Category | Weight |
-|----------|--------|
-| Technical SEO | 25% |
-| Content Quality | 25% |
-| On-Page SEO | 20% |
-| Schema / Structured Data | 10% |
-| Performance (CWV) | 10% |
-| Images | 5% |
-| AI Search Readiness | 5% |
+**Source of truth: `scripts/page_score.py:CHECKERS`.**
+
+| Category | Weight | Checkers |
+|----------|--------|----------|
+| Technical | 20% | redirects + security headers |
+| Schema | 15% | schema required+recommended fields |
+| Images | 15% | alt / format / dims / lazy |
+| Links | 15% | broken links per page |
+| Performance (CWV) | 15% | PageSpeed Insights field+lab |
+| Content | 10% | Flesch + E-E-A-T + density |
+| GEO | 10% | hreflang + llms.txt |
+| Informational | 0% | parse_html + cms_detector (no score impact) |
 
 ## Report Structure
 

@@ -35,7 +35,7 @@ on-page SEO, schema, structure, GEO signals. **Findings are labelled
 
 ### L1 — Deterministic Python checkers
 
-11 standalone scripts in `scripts/`. Each fetches the target with a
+29 standalone scripts in `scripts/`. Each fetches the target with a
 realistic Chrome User-Agent (passes Cloudflare/WAFs), runs SSRF guards
 against private IPs, retries on 5xx, and outputs JSON with a meaningful
 exit code (0 = clean, 1 = fetch failed, 2 = issues found). **Findings

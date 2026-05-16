@@ -48,6 +48,31 @@ study). The implication: traditional rank-1-to-10 optimization alone no
 longer guarantees AI citation. Off-page brand signals (YouTube, Reddit,
 forums, earned media) now drive the majority of citations.
 
+### Proven content-side citation boost factors (2026 research)
+
+When your content includes these patterns, AI engines cite it more often:
+
+| Element | Citation rate boost | Why it works |
+|---------|---------------------|--------------|
+| **Expert quotes** with attribution | **+41%** | LLMs use quotation marks + attribution as a proxy for credibility |
+| **Statistics** with concrete numbers | **+30%** | Signals factual density; LLMs prefer specific over abstract |
+| **Inline citations** linking to primary sources | **+30%** | Shows the content itself is building on authoritative sources — chain of trust |
+
+Source: aggregated 2026 GEO research (ALM Corp, Backlinko, Frase, Searchengineland).
+
+### Platform-specific citation behaviour (verified 2026)
+
+LLMs cite far fewer sources than Google's 10 blue links — typically **2-7 domains per response**. Citation is much more competitive. Each platform has distinct preferences:
+
+| Platform | Citation behaviour | What it favours |
+|----------|--------------------|-----------------|
+| **Perplexity** | Always shows citations explicitly | Authoritative sources, original data, primary research |
+| **ChatGPT** | Lifts bullet points and FAQs verbatim | Structured formats: bullet lists, numbered steps, Q&A blocks. Wikipedia (13%) + Reddit (12%) dominate |
+| **Google AI Overviews** | Cites passages from top-ranked + brand-signal-strong sources | Short definitions, visuals, FAQ-style answers (though FAQ rich-result is gone, FAQ-structured content still ranks well in AIO) |
+| **Claude** | Conservative, cites sparingly when web search enabled | Well-cited primary sources, transparency markers |
+| **Grok** | Heavy social media + recent web | Recent X/Twitter content, breaking news |
+| **Gemini** | Same Google index + Gemini ranking | Same as AIO + structured data + entity clarity |
+
 ---
 
 ## GEO Analysis Criteria (Updated)

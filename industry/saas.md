@@ -1,5 +1,7 @@
-<!-- Updated: 2026-05-15 -->
+<!-- Updated: 2026-05-16 -->
 # SaaS SEO Strategy Template
+
+> ⚠️ **Google March 2026 Core Update** — first-hand experience now weighted dramatically more heavily. For SaaS, this means: case studies from real customers > generic feature copy; founder-authored posts > anonymous content team; product screenshots > stock images. See [`references/eeat-framework.md`](../references/eeat-framework.md).
 
 ## Industry Characteristics
 

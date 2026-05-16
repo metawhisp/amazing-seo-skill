@@ -1,5 +1,7 @@
-<!-- Updated: 2026-05-15 -->
+<!-- Updated: 2026-05-16 -->
 # Local Service Business SEO Strategy Template
+
+> ⚠️ **Google March 2026 Core Update** — first-hand experience signal heavy. For local services: photos of the actual business + team > stock images; customer reviews on the page (not just GBP) > generic testimonials; service-area pages authored by named licensed practitioners > generic city-template copy. See [`references/eeat-framework.md`](../references/eeat-framework.md).
 
 ## Industry Characteristics
 

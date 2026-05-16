@@ -17,7 +17,8 @@
 #   tools/site_audit.sh example.com --limit 20 > REPORT.md
 #   tools/site_audit.sh https://example.com/sitemap.xml --limit 50
 #
-# Defaults: --limit 20, --out tests/private-fixtures/site-<domain>/
+# Defaults: --limit 20
+# Output base: $AMAZING_SEO_OUTPUT_DIR or ~/.amazing-seo-skill/runs/
 
 set -u
 
@@ -59,7 +60,8 @@ case "$TARGET" in
 esac
 
 DOMAIN=$(echo "$SITEMAP_URL" | sed -E 's|^https?://||; s|/.*||')
-[ -z "$OUT" ] && OUT="tests/private-fixtures/site-$DOMAIN"
+_OUTPUT_BASE="${AMAZING_SEO_OUTPUT_DIR:-$HOME/.amazing-seo-skill/runs}"
+[ -z "$OUT" ] && OUT="$_OUTPUT_BASE/site-$DOMAIN-$(date -u +%Y%m%d-%H%M%S)"
 mkdir -p "$OUT"
 
 UA="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"

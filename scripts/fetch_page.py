@@ -8,10 +8,7 @@ Usage:
 """
 
 import argparse
-import ipaddress
-import socket
 import sys
-from typing import Optional
 from urllib.parse import urlparse
 
 try:
@@ -20,19 +17,10 @@ except ImportError:
     print("Error: requests library required. Install with: pip install requests")
     sys.exit(1)
 
-
-DEFAULT_HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
-    ),
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.9",
-    # Only encodings requests can decode without extras (no `br` — needs `brotli` pkg)
-    "Accept-Encoding": "gzip, deflate",
-    "Connection": "keep-alive",
-    "Upgrade-Insecure-Requests": "1",
-}
+# Shared module — realistic UA + SSRF guard + retries.
+# Earlier this file had its own SSRF + UA constants; deleted, now imports
+# the canonical implementation from _fetch.py.
+from _fetch import fetch as _shared_fetch, SSRFBlocked
 
 
 def fetch_page(
@@ -68,46 +56,26 @@ def fetch_page(
         "error": None,
     }
 
-    # Validate URL
+    # Validate URL scheme
     parsed = urlparse(url)
     if not parsed.scheme:
         url = f"https://{url}"
         parsed = urlparse(url)
-
     if parsed.scheme not in ("http", "https"):
         result["error"] = f"Invalid URL scheme: {parsed.scheme}"
         return result
 
-    # SSRF prevention: block private/internal IPs
+    # _shared_fetch handles SSRF + realistic UA + retries
     try:
-        resolved_ip = socket.gethostbyname(parsed.hostname)
-        ip = ipaddress.ip_address(resolved_ip)
-        if ip.is_private or ip.is_loopback or ip.is_reserved:
-            result["error"] = f"Blocked: URL resolves to private/internal IP ({resolved_ip})"
-            return result
-    except (socket.gaierror, ValueError):
-        pass  # DNS resolution failure handled by requests below
-
-    try:
-        session = requests.Session()
-        session.max_redirects = max_redirects
-
-        response = session.get(
-            url,
-            headers=DEFAULT_HEADERS,
-            timeout=timeout,
-            allow_redirects=follow_redirects,
-        )
-
+        response = _shared_fetch(url, timeout=timeout)
         result["url"] = response.url
         result["status_code"] = response.status_code
         result["content"] = response.text
         result["headers"] = dict(response.headers)
-
-        # Track redirect chain
         if response.history:
             result["redirect_chain"] = [r.url for r in response.history]
-
+    except SSRFBlocked as e:
+        result["error"] = f"Blocked: {e}"
     except requests.exceptions.Timeout:
         result["error"] = f"Request timed out after {timeout} seconds"
     except requests.exceptions.TooManyRedirects:

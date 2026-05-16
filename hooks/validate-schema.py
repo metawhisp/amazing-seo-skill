@@ -95,6 +95,7 @@ def _validate_schema_object(obj: dict, block_num: int) -> List[str]:
     # Check for deprecated types
     schema_type = obj.get("@type", "")
     deprecated = {
+        "FAQPage": "rich results removed May 7, 2026 (Google ended even gov/health exception)",
         "HowTo": "deprecated September 2023",
         "SpecialAnnouncement": "deprecated July 31, 2025",
         "CourseInfo": "retired June 2025",
@@ -106,10 +107,9 @@ def _validate_schema_object(obj: dict, block_num: int) -> List[str]:
     if schema_type in deprecated:
         errors.append(f"{prefix}: @type '{schema_type}' is {deprecated[schema_type]}")
 
-    # Check for restricted types used incorrectly
-    restricted = {"FAQPage": "restricted to government and healthcare sites only (Aug 2023)"}
-    if schema_type in restricted:
-        errors.append(f"{prefix}: @type '{schema_type}' is {restricted[schema_type]} — verify site qualifies")
+    # FAQPage merged into deprecated list above (Google removed rich result May 7, 2026)
+    # No more "restricted" category — historical August 2023 restriction was the
+    # final phase before full removal.
 
     return errors
 

@@ -1,6 +1,6 @@
+<!-- Updated: 2026-05-16 -->
 # E-E-A-T Evaluation Framework
-## Updated per Google Quality Rater Guidelines — September 11, 2025
-## Plus December 2025 Core Update Implications
+## Updated per Google QRG (September 11, 2025) + Dec 2025 Core Update + March 2026 Core Update
 
 ## Overview
 
@@ -9,32 +9,54 @@ E-E-A-T = **E**xperience, **E**xpertise, **A**uthoritativeness, **T**rustworthin
 Trustworthiness is the most important factor. It is assessed based on the
 other three signals plus direct trust indicators.
 
-## CRITICAL: December 2025 Core Update
+## CRITICAL: March 2026 Core Update
 
-> **E-E-A-T now applies to ALL competitive queries, not just YMYL.**
+> **First-hand experience is now weighted dramatically more heavily.** Generic content compiled from secondary sources consistently underperforms practitioner-authored content for the same query.
 
-The December 2025 core update was described as a "watershed moment" that:
+What changed in March 2026:
+- "Experience" pillar of E-E-A-T became the **strongest signal** for many queries (previously Trust held that role).
+- Author attribution alone no longer enough — need **verifiable practitioner credentials** (LinkedIn linked, past published work, industry-specific credentials).
+- "Non-commodity content" emphasis: pages that aggregate widely-available info without unique perspective rank lower.
+- Articles written by practitioners with first-hand experience consistently outrank generic compiled content for the same query.
+
+What you should change in audit recommendations:
+- For each long-form content piece, ask: "Does this show first-hand experience? Photos taken by author? Direct quotes? Unique data the author collected?"
+- For commercial sites, ask: "Is there a real practitioner behind this content, or is it generic SEO-padding?"
+
+## December 2025 Core Update (still applicable)
+
+> **E-E-A-T applies to ALL competitive queries, not just YMYL.**
+
 - Extended E-E-A-T evaluation to virtually all competitive queries
-- Made author attribution standards tighter across all categories
-- Penalized anonymous or generic authorship even for non-YMYL content
+- Tighter author attribution standards across all categories
+- Penalised anonymous or generic authorship even for non-YMYL content
 - Significantly improved AI content quality detection
 
-**Impact by industry:**
+**Industry impact (cumulative through March 2026):**
 | Industry | Traffic Drops |
 |----------|--------------|
 | Affiliate sites | 71% average decline |
 | Health/YMYL | 67% average decline |
 | E-commerce | 52% average decline |
+| Generic compiled content | now severe impact regardless of niche (March 2026 addition) |
 
-**Key takeaway:** Even entertainment and lifestyle content now requires demonstrated expertise. Generic content no longer ranks.
+## QRG September 2025 — structural changes
 
-## YMYL (Your Money or Your Life)
+- YMYL category "Society" → **"Government, Civics & Society"** (renamed Sept 2025)
+- New **AI Overviews evaluation chapter** added — raters now formally evaluate
+  AI-generated answers in Google's SERP. Content that AI cites poorly is rated
+  "Lowest Quality" even if the page itself looks fine.
+- Pure AI-generated content **without human review and unique value** = "Lowest Quality"
+- Sensitive content guidance expanded, especially for social and political topics
+
+## YMYL (Your Money or Your Life) — current scope
 
 Topics requiring **highest** E-E-A-T standards (but E-E-A-T now matters everywhere):
 - Health and safety
 - Financial advice and transactions
 - Legal information
 - News and current events
+- **Government, Civics & Society** (renamed Sept 2025, was "Society")
 - **Elections and civic trust** (added Sept 2025)
 - **Democratic processes** (added Sept 2025)
 - Groups of people (potential for harm)

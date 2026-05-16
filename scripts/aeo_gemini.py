@@ -91,20 +91,24 @@ def _extract_citations(response: dict) -> list[dict]:
 
 
 def _query_gemini(api_key: str, model: str, query: str, timeout: int = 60) -> dict:
+    # Direct requests.post — exempt from _fetch wrapping because:
+    #   (a) fixed Google API endpoint, no SSRF surface
+    #   (b) _fetch.fetch is GET-only
+    # Retry on 5xx (transient Gemini outages happen).
+    import time
     url = _ENDPOINT.format(model=model)
     body = {
         "contents": [{"parts": [{"text": query}]}],
         "tools": [{"google_search": {}}],
     }
-    r = requests.post(
-        url,
-        headers={
-            "x-goog-api-key": api_key,
-            "Content-Type": "application/json",
-        },
-        json=body,
-        timeout=timeout,
-    )
+    headers = {"x-goog-api-key": api_key, "Content-Type": "application/json"}
+    for attempt in range(3):
+        r = requests.post(url, headers=headers, json=body, timeout=timeout)
+        if r.status_code >= 500 and attempt < 2:
+            time.sleep(2 * (attempt + 1))
+            continue
+        r.raise_for_status()
+        return r.json()
     r.raise_for_status()
     return r.json()
 

@@ -66,10 +66,8 @@ See `schema/templates.json` for ready-to-use JSON-LD templates for these types.
 
 > **JSON-LD and JavaScript rendering:** Per Google's December 2025 JS SEO guidance, structured data injected via JavaScript may face delayed processing. For time-sensitive markup (especially Product, Offer), include JSON-LD in the initial server-rendered HTML.
 
-### RESTRICTED — only for specific sites:
-- **FAQ**: ONLY for government and healthcare authority sites (restricted Aug 2023)
-
 ### DEPRECATED — never recommend:
+- **FAQPage**: Rich results fully removed May 7, 2026 (Google ended even the gov/health exception). Stop recommending for new pages; existing FAQ schema is harmless to leave but won't produce rich results.
 - **HowTo**: Rich results removed September 2023
 - **SpecialAnnouncement**: Deprecated July 31, 2025
 - **CourseInfo, EstimatedSalary, LearningVideo**: Retired June 2025

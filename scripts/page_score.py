@@ -6,15 +6,18 @@ Runs every applicable L1 deterministic checker on one URL in parallel,
 aggregates findings, computes a weighted Health Score (0-100), and emits
 a structured report (JSON or Markdown).
 
-Weights (sum = 100), aligned with skills/audit.md scoring rubric:
+Weights (sum = 100). Single source of truth — code below in CHECKERS is
+authoritative; this docstring and references in SKILL.md / skills/audit.md
+mirror it. If you change weights, change them all.
 
-  technical (redirects + security)       25 %
+  technical (redirects + security)       20 %
   schema markup                          15 %
   images / CLS / LCP                     15 %
   links (internal + broken)              15 %
   CWV (PSI)                              15 %  (skipped if no API key — weight redistributed)
+  content (Flesch + E-E-A-T + density)   10 %
   GEO signals (llms.txt, hreflang)       10 %
-  on-page extras (parse_html)            5  %
+  on-page extras (parse_html, cms)        0 %  (informational, no score impact)
 
 If a checker fails to run (e.g. no PSI key, no Gemini key), its weight is
 **not** counted as 0 — it's removed from the denominator. Score reflects
@@ -154,7 +157,18 @@ def _classify_severity(text: str) -> str:
 
 
 def _score_for(result: dict) -> tuple[int, list[dict]]:
-    """Return (sub_score 0-100, findings list) for one checker run."""
+    """Return (sub_score 0-100, findings list) for one checker run.
+
+    Accepts BOTH:
+      (a) Legacy format: `issues: ["text", "text", ...]` — severity inferred
+          via regex patterns (brittle, deprecated).
+      (b) Envelope format (v0.7.0+): `issues: [{severity, text, evidence?}, ...]`
+          — severity travels with the finding, no regex needed.
+
+    Mixed lists are supported (some str, some dict) — each item handled
+    by its own type. As checkers migrate to (b), the regex classifier
+    becomes dead code; until then, both formats coexist.
+    """
     data = result.get("data") or {}
     issues = data.get("issues", [])
     if not isinstance(issues, list):
@@ -163,10 +177,23 @@ def _score_for(result: dict) -> tuple[int, list[dict]]:
     findings: list[dict] = []
     deduction = 0
     for issue in issues:
-        text = issue if isinstance(issue, str) else str(issue)
-        sev = _classify_severity(text)
+        if isinstance(issue, dict) and "severity" in issue:
+            # New envelope format: severity is authoritative
+            sev = issue["severity"]
+            text = issue.get("text", "")
+            if sev not in ("P0", "P1", "P2"):
+                sev = _classify_severity(text)
+            evidence = issue.get("evidence")
+        else:
+            # Legacy string format: regex classifier (deprecated path)
+            text = issue if isinstance(issue, str) else str(issue)
+            sev = _classify_severity(text)
+            evidence = None
         deduction += {"P0": 10, "P1": 5, "P2": 2}[sev]
-        findings.append({"severity": sev, "text": text})
+        finding_out = {"severity": sev, "text": text}
+        if evidence is not None:
+            finding_out["evidence"] = evidence
+        findings.append(finding_out)
 
     sub_score = max(0, 100 - deduction)
     return sub_score, findings

@@ -91,7 +91,7 @@ When invoked with `audit`, delegate to sub-agents in parallel:
    - `sitemap` — structure, coverage, quality gates
    - `performance` — Core Web Vitals via real browser
    - `visual` — screenshots, mobile testing, above-fold
-3. Run Verifier agent: dedupe contradictions across sub-agent reports
+3. Dedupe contradictions across sub-agent reports (inline reasoning)
 4. Generate unified report:
    - SEO Health Score (0-100)
    - Findings table with confidence labels (Confirmed / Likely / Hypothesis)
@@ -201,22 +201,24 @@ relevant ones for the current task:
 | Programmatic SEO | `skills/programmatic.md` | Scale page generation safely |
 | Competitor pages | `skills/competitor-pages.md` | "X vs Y" / "alternatives to X" |
 | Hreflang / i18n | `skills/hreflang.md` | International SEO |
+| Growth opportunities | `skills/growth.md` | Competitor gap analysis via Ahrefs MCP |
 
 ## Scoring Methodology
 
 ### SEO Health Score (0-100)
 
-Weighted aggregate across categories:
+Weighted aggregate across categories. **Source of truth: `scripts/page_score.py:CHECKERS`** — these weights mirror it exactly.
 
-| Category | Weight |
-|----------|--------|
-| Technical SEO | 25% |
-| Content Quality | 25% |
-| On-Page SEO | 20% |
-| Schema / Structured Data | 10% |
-| Performance (CWV) | 10% |
-| Images | 5% |
-| AI Search Readiness | 5% |
+| Category | Weight | Checkers |
+|----------|--------|----------|
+| Technical | 20% | `redirect_chain_checker` + `security_headers_checker` |
+| Schema / Structured Data | 15% | `schema_recommended_fields` |
+| Images | 15% | `images_audit` |
+| Links | 15% | `broken_links_checker` |
+| Performance (CWV) | 15% | `psi_checker` (skipped if no API key — weight removed from denominator) |
+| Content | 10% | `content_quality` |
+| GEO | 10% | `hreflang_checker` + `llms_txt_checker` |
+| On-page / Platform | 0% | `parse_html`, `cms_detector` (informational only) |
 
 ### Priority Levels
 

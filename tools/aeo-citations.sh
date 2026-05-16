@@ -47,7 +47,8 @@ GOOGLE_GEMINI_API_KEY=$(get_key google-gemini-api-key)
 [ -z "$GOOGLE_GEMINI_API_KEY" ] && echo "WARN: google-gemini-api-key missing in Keychain (Gemini probe disabled)" >&2
 
 # ── Write minimal engine config (gitignored fixtures dir) ──────────────────
-RUN_DIR="$SKILL_DIR/tests/private-fixtures/aeo-runs/$DOMAIN"
+_OUTPUT_BASE="${AMAZING_SEO_OUTPUT_DIR:-$HOME/.amazing-seo-skill/runs}"
+RUN_DIR="$_OUTPUT_BASE/aeo-$DOMAIN-$(date -u +%Y%m%d-%H%M%S)"
 mkdir -p "$RUN_DIR"
 CONFIG="$RUN_DIR/$AMAZING_SEO_AEO_CITATIONS_CONFIG_FILENAME"
 

@@ -43,7 +43,7 @@ from urllib.parse import urlparse
 
 import requests
 
-from _fetch import fetch
+from _fetch import fetch, finding, result_envelope
 
 
 _HSTS_MIN_MAX_AGE = 31_536_000   # 1 year — Google's strict-transport rec
@@ -129,89 +129,95 @@ def main() -> int:
 
     headers = {k.lower(): v for k, v in r.headers.items()}
     is_https = urlparse(r.url).scheme == "https"
-    out: dict = {
-        "url": url,
-        "final_url": r.url,
-        "http_status": r.status_code,
-        "is_https": is_https,
-    }
-    issues: list[str] = []
+    payload: dict = {"is_https": is_https}
+    issues: list[dict] = []
 
     # 1. HSTS
     hsts_raw = headers.get("strict-transport-security")
     if not is_https:
-        issues.append("served over HTTP, not HTTPS — Google ranking penalty")
-        out["hsts"] = None
+        issues.append(finding("P0", "served over HTTP, not HTTPS — Google ranking penalty"))
+        payload["hsts"] = None
     elif not hsts_raw:
-        issues.append("missing Strict-Transport-Security header")
-        out["hsts"] = None
+        issues.append(finding("P1", "missing Strict-Transport-Security header"))
+        payload["hsts"] = None
     else:
         h = _parse_hsts(hsts_raw)
-        out["hsts"] = h
+        payload["hsts"] = h
         if not h["max_age"] or h["max_age"] < _HSTS_MIN_MAX_AGE:
-            issues.append(f"HSTS max-age too short ({h['max_age']}s; recommend >= {_HSTS_MIN_MAX_AGE}s)")
+            issues.append(finding("P1",
+                f"HSTS max-age too short ({h['max_age']}s; recommend >= {_HSTS_MIN_MAX_AGE}s)",
+                {"current_max_age": h["max_age"], "recommended_min": _HSTS_MIN_MAX_AGE}))
         if not h["include_subdomains"]:
-            issues.append("HSTS missing includeSubDomains (recommended unless you have non-HTTPS subdomains)")
+            issues.append(finding("P1",
+                "HSTS missing includeSubDomains (recommended unless you have non-HTTPS subdomains)"))
 
     # 2. CSP
     csp_raw = headers.get("content-security-policy")
     cspro_raw = headers.get("content-security-policy-report-only")
     if not csp_raw and not cspro_raw:
-        issues.append("missing Content-Security-Policy header")
-        out["csp"] = None
+        issues.append(finding("P1", "missing Content-Security-Policy header"))
+        payload["csp"] = None
     else:
         primary = csp_raw or cspro_raw
         analysis = _analyze_csp(primary)
         analysis["mode"] = "enforced" if csp_raw else "report-only"
-        out["csp"] = analysis
+        payload["csp"] = analysis
         if not csp_raw and cspro_raw:
-            issues.append("CSP is report-only, not enforced — switch to enforcing mode when ready")
+            issues.append(finding("P2",
+                "CSP is report-only, not enforced — switch to enforcing mode when ready"))
         if analysis["has_unsafe_inline"] and not analysis["uses_nonce_or_hash"]:
-            issues.append("CSP allows 'unsafe-inline' without nonce/hash — defeats XSS protection")
+            issues.append(finding("P0",
+                "CSP allows 'unsafe-inline' without nonce/hash — defeats XSS protection"))
         if analysis["has_unsafe_eval"]:
-            issues.append("CSP allows 'unsafe-eval' — security weakening")
+            issues.append(finding("P0", "CSP allows 'unsafe-eval' — security weakening"))
         if not analysis["has_default_src"]:
-            issues.append("CSP missing default-src — fallback for unspecified resource types")
+            issues.append(finding("P2",
+                "CSP missing default-src — fallback for unspecified resource types"))
 
-    # 3. Clickjacking protection: X-Frame-Options OR CSP frame-ancestors
+    # 3. Clickjacking protection
     xfo = headers.get("x-frame-options")
-    csp_has_fa = bool(out.get("csp") and out["csp"].get("has_frame_ancestors"))
-    out["x_frame_options"] = xfo
-    out["clickjacking_protected"] = bool(xfo) or csp_has_fa
-    if not out["clickjacking_protected"]:
-        issues.append("no clickjacking protection — set X-Frame-Options: DENY or CSP frame-ancestors")
+    csp_has_fa = bool(payload.get("csp") and payload["csp"].get("has_frame_ancestors"))
+    payload["x_frame_options"] = xfo
+    payload["clickjacking_protected"] = bool(xfo) or csp_has_fa
+    if not payload["clickjacking_protected"]:
+        issues.append(finding("P1",
+            "no clickjacking protection — set X-Frame-Options: DENY or CSP frame-ancestors"))
 
     # 4. X-Content-Type-Options
     xcto = headers.get("x-content-type-options", "").lower()
-    out["x_content_type_options"] = xcto or None
+    payload["x_content_type_options"] = xcto or None
     if xcto != "nosniff":
-        issues.append("X-Content-Type-Options is not 'nosniff' — MIME-sniff attacks possible")
+        issues.append(finding("P2",
+            "X-Content-Type-Options is not 'nosniff' — MIME-sniff attacks possible"))
 
     # 5. Referrer-Policy
     rp = headers.get("referrer-policy")
-    out["referrer_policy"] = rp
+    payload["referrer_policy"] = rp
     if not rp:
-        issues.append("missing Referrer-Policy header")
+        issues.append(finding("P2", "missing Referrer-Policy header"))
     elif rp.lower() in ("unsafe-url", "no-referrer-when-downgrade"):
-        issues.append(f"Referrer-Policy={rp!r} leaks referrer to HTTP origins — consider 'strict-origin-when-cross-origin'")
+        issues.append(finding("P2",
+            f"Referrer-Policy={rp!r} leaks referrer to HTTP origins — consider 'strict-origin-when-cross-origin'"))
 
     # 6. Permissions-Policy
     pp = headers.get("permissions-policy") or headers.get("feature-policy")
-    out["permissions_policy"] = pp
+    payload["permissions_policy"] = pp
     if not pp:
-        issues.append("missing Permissions-Policy header (informational)")
+        issues.append(finding("P2", "missing Permissions-Policy header (informational)"))
 
     # 7. Mixed content scan
     mixed = _scan_mixed_content(r.text) if is_https else []
-    out["mixed_content"] = {
-        "count": len(mixed),
-        "samples": mixed[:10],
-    }
+    payload["mixed_content"] = {"count": len(mixed), "samples": mixed[:10]}
     if mixed:
-        issues.append(f"mixed content: {len(mixed)} http:// resources on HTTPS page")
+        issues.append(finding("P1",
+            f"mixed content: {len(mixed)} http:// resources on HTTPS page",
+            {"sample_urls": mixed[:10]}))
 
-    out["issues"] = issues
-    out["score"] = max(0, 100 - len(issues) * 10)
+    payload["issues"] = issues
+    payload["score"] = max(0, 100 - sum(
+        {"P0": 15, "P1": 10, "P2": 3}[i["severity"]] for i in issues
+    ))
+    out = result_envelope(target=url, response=r, checker="security_headers_checker.py", **payload)
     print(json.dumps(out, indent=2, ensure_ascii=False))
     return 2 if issues else 0
 

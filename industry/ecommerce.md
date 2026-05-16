@@ -1,5 +1,7 @@
-<!-- Updated: 2026-05-15 -->
+<!-- Updated: 2026-05-16 -->
 # E-commerce SEO Strategy Template
+
+> ⚠️ **Google March 2026 Core Update** — first-hand experience signal weighted heavily. For e-commerce: real customer reviews > scraped review aggregators; original product photos > stock manufacturer images; merchant-authored guides > generic content-mill articles. See [`references/eeat-framework.md`](../references/eeat-framework.md).
 
 ## Industry Characteristics
 

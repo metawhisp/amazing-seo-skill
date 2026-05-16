@@ -1,5 +1,7 @@
-<!-- Updated: 2026-05-15 -->
+<!-- Updated: 2026-05-16 -->
 # Publisher/Media SEO Strategy Template
+
+> ⚠️ **Google March 2026 Core Update** — first-hand experience is now the dominant E-E-A-T signal. For publishers: byline-credentialed reporters > anonymous staff writers; original reporting + interviews > syndicated/aggregated content; verifiable expertise (LinkedIn, past published work) per author. See [`references/eeat-framework.md`](../references/eeat-framework.md).
 
 ## Industry Characteristics
 

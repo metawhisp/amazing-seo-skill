@@ -138,10 +138,20 @@ def _extract_lab(payload: dict) -> dict:
 
 
 def run_psi(url: str, strategy: str, api_key: str | None) -> dict:
+    # Direct requests.get (not _fetch.fetch) — exempt because we hit a
+    # fixed Google API endpoint, not arbitrary user URLs. SSRF guard
+    # would block 142.250.x.x ranges spuriously. Retry on 5xx manually.
     params = {"url": url, "strategy": strategy.upper()}
     if api_key:
         params["key"] = api_key
-    r = requests.get(_API_URL, params=params, timeout=60)
+    for attempt in range(3):
+        r = requests.get(_API_URL, params=params, timeout=60)
+        if r.status_code >= 500 and attempt < 2:
+            import time
+            time.sleep(2 * (attempt + 1))
+            continue
+        r.raise_for_status()
+        return r.json()
     r.raise_for_status()
     return r.json()
 

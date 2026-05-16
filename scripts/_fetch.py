@@ -1,7 +1,7 @@
 """
-Shared HTTP fetch helper for all amazing-seo-skill checkers.
+Shared HTTP fetch helper + JSON envelope for all amazing-seo-skill checkers.
 
-Centralises three concerns every checker has:
+Centralises four concerns every checker has:
 
   1. **User-Agent.** Defaults to a realistic Chrome UA so checkers don't
      get 403'd by Cloudflare / Akamai / WAFs that block custom bot UAs.
@@ -15,10 +15,20 @@ Centralises three concerns every checker has:
      `max_retries` retries with exponential backoff. 4xx is returned as-is
      (callers want to see 404 / 410 / 451).
 
+  4. **Standardized JSON envelope.** Every checker wraps its output via
+     `result_envelope(target, response, checker, **payload)` so downstream
+     consumers (page_score, audit_history, dashboard) get the same fields
+     in the same place: target, final_url, http_status, generated_at,
+     skill_version, checker. Plus standardized `issues: [{severity, text,
+     evidence}]` format.
+
 Public surface:
     fetch(url, *, timeout=15, ua=None, headers=None, max_retries=2,
           allow_private=False) -> requests.Response
     SSRFBlocked  — raised when SSRF guard rejects the target
+    result_envelope(...) — standardized JSON wrapper
+    finding(severity, text, evidence=None) — standardized P0/P1/P2 marker
+    SKILL_VERSION — current skill version string
 """
 from __future__ import annotations
 
@@ -26,10 +36,14 @@ import ipaddress
 import os
 import socket
 import time
-from typing import Optional
+from datetime import datetime, timezone
+from typing import Any, Optional
 from urllib.parse import urlparse
 
 import requests
+
+
+SKILL_VERSION = "0.7.0"
 
 
 _DEFAULT_UA = os.environ.get(
@@ -113,3 +127,77 @@ def fetch(
 
     assert last_exc is not None
     raise last_exc
+
+
+# ── Standardized JSON envelope ────────────────────────────────────────────
+# Every checker emits its top-level dict through this helper so downstream
+# tools (page_score, audit_history, dashboard, render_html_report) can rely
+# on:
+#   - target / final_url / http_status — fields named identically across
+#     all checkers (was inconsistent: some had `url`, some `final_url`,
+#     some both, some `http_status`, some none)
+#   - generated_at / skill_version — for history.db forensics + trend
+#     attribution (was missing entirely)
+#   - checker — name of the script that produced the result
+#   - issues: [{severity, text, evidence}, ...] — severity travels WITH
+#     the finding, not regex-classified later (fixes brittle classifier
+#     in page_score.py that silently failed on issue-wording changes)
+
+def result_envelope(
+    target: str,
+    response: requests.Response | None,
+    checker: str,
+    **payload: Any,
+) -> dict:
+    """Wrap a checker's output in the standard envelope.
+
+    Args:
+        target:    The URL the caller was asked to check (pre-redirect input).
+        response:  The requests.Response from a successful fetch, or None
+                   if the checker didn't fetch directly (e.g. log_analyzer).
+                   We use response.url for final_url and response.status_code
+                   for http_status when present.
+        checker:   The checker filename (e.g. "robots_checker.py") for
+                   provenance in history.
+        **payload: All checker-specific fields go here. Must include `issues`
+                   (list of dicts with `severity` + `text`) when there are
+                   findings.
+
+    Returns:
+        Standardized dict ready to json.dumps.
+    """
+    envelope = {
+        "target": target,
+        "final_url": response.url if response is not None else None,
+        "http_status": response.status_code if response is not None else None,
+        "checker": checker,
+        "skill_version": SKILL_VERSION,
+        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
+    envelope.update(payload)
+    return envelope
+
+
+def finding(
+    severity: str,
+    text: str,
+    evidence: Any | None = None,
+) -> dict:
+    """Construct a standardized finding dict.
+
+    severity: 'P0' (blocks indexing / penalty), 'P1' (significant ranking
+              impact), 'P2' (optimization opportunity). See
+              references/severity-rubric.md for full criteria.
+
+    text:     Human-readable, prefer specific numbers ("64 missing
+              canonicals") over vague ("some canonicals missing").
+
+    evidence: Optional structured data — e.g. {"affected_urls": [...]}.
+              Surfaces in dashboard run-detail page for drill-down.
+    """
+    if severity not in ("P0", "P1", "P2"):
+        raise ValueError(f"severity must be P0/P1/P2, got {severity!r}")
+    f = {"severity": severity, "text": text}
+    if evidence is not None:
+        f["evidence"] = evidence
+    return f

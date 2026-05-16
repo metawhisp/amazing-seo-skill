@@ -47,20 +47,11 @@ Google's documentation explicitly recommends JSON-LD over Microdata and RDFa.
 
 ---
 
-## Restricted — Only for specific site types
-
-| Type | Restriction | Since |
-|------|------------|-------|
-| FAQPage | Government and healthcare authority sites ONLY | August 2023 |
-
-> Google severely limited FAQ rich results. Only authoritative sources (government, health organizations) now receive FAQ rich results. Do NOT recommend FAQPage schema for commercial sites.
-
----
-
 ## Deprecated — Never recommend
 
 | Type | Status | Since | Notes |
 |------|--------|-------|-------|
+| **FAQPage** | **Rich results fully removed for ALL sites** | **May 7, 2026** | **Google ended the August 2023 restriction by removing FAQ rich result support entirely. Even government/healthcare sites no longer get FAQ rich results. The Schema.org type itself remains valid; unused structured data doesn't hurt SEO — but stop recommending FAQPage for new pages, and don't expect rich-result eligibility for existing ones. Rich Results Test FAQ support removed June 2026; Search Console API support removes August 2026.** |
 | HowTo | Rich results fully removed | September 2023 | Google stopped showing how-to rich results |
 | SpecialAnnouncement | Deprecated | July 31, 2025 | COVID-era schema, no longer processed |
 | CourseInfo | Retired from rich results | June 2025 | Merged into Course |

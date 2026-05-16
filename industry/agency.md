@@ -1,5 +1,7 @@
-<!-- Updated: 2026-05-15 -->
+<!-- Updated: 2026-05-16 -->
 # Agency/Consultancy SEO Strategy Template
+
+> ⚠️ **Google March 2026 Core Update** — first-hand experience is dominant. For agencies: detailed case studies with named clients + measurable results > vague "we helped X grow"; consultant-byline-credentialed blog posts > anonymous content team; real screenshots of dashboards/results > stock graphics. See [`references/eeat-framework.md`](../references/eeat-framework.md).
 
 ## Industry Characteristics
 

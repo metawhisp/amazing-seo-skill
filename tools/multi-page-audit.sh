@@ -6,7 +6,8 @@
 # Usage:
 #   tools/multi-page-audit.sh <domain_or_sitemap_url> [--limit N] [--out DIR]
 #
-# Defaults: --limit 20, --out tests/private-fixtures/multi-audit-<domain>/
+# Defaults: --limit 20
+# Output base: $AMAZING_SEO_OUTPUT_DIR or ~/.amazing-seo-skill/runs/
 set -e
 
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -50,7 +51,8 @@ case "$TARGET" in
 esac
 
 DOMAIN=$(echo "$SITEMAP_URL" | sed -E 's|^https?://||; s|/.*||')
-[ -z "$OUT" ] && OUT="tests/private-fixtures/multi-audit-$DOMAIN"
+_OUTPUT_BASE="${AMAZING_SEO_OUTPUT_DIR:-$HOME/.amazing-seo-skill/runs}"
+[ -z "$OUT" ] && OUT="$_OUTPUT_BASE/multi-audit-$DOMAIN-$(date -u +%Y%m%d-%H%M%S)"
 mkdir -p "$OUT"
 
 echo "==> Fetching sitemap: $SITEMAP_URL"

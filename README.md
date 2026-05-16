@@ -88,7 +88,7 @@ data-driven growth opportunities — all from a single Claude Code prompt.
 | Layer | Source | Purpose |
 |-------|--------|---------|
 | L0 | Claude reasoning + WebFetch | Analysis, prioritization, recommendations |
-| L1 | Python scripts (~10 deterministic checkers) | Reproducible verdicts on robots, hreflang, schema, llms.txt, internal links |
+| L1 | Python scripts (~29 deterministic checkers) | Reproducible verdicts on robots, sitemap, redirects, security headers, broken links, images, hreflang, schema, llms.txt, internal links, CWV, CMS detection, JS rendering, content quality, local SEO, log analysis, AI visibility |
 | L2 | Local CLI engines (configurable) | Real-browser CWV, 251-rule deep audit, live AEO citations |
 | L3 | External APIs (Ahrefs, GSC) | Backlink data, real keyword performance |
 | L4 | Multi-LLM ensemble (Anthropic, OpenAI, Perplexity, xAI, Google Gemini-with-Search) | Live AEO citation testing across all major AI surfaces |
@@ -218,7 +218,7 @@ amazing-seo-skill/
 ├── README.md           # this file
 ├── install.sh          # full-mode installer (engine-agnostic)
 ├── skills/             # 13 sub-skill modules — each works standalone too
-├── agents/             # parallel sub-agents (verifier, growth-finder, ...)
+├── agents/             # parallel sub-agents (growth-finder)
 ├── scripts/            # Python deterministic checkers
 ├── tools/              # user-facing wrappers (cwv-checker, aeo-citations, ...)
 ├── .bin/               # internal engine wrappers (env-driven, brand-neutral)
@@ -232,9 +232,8 @@ amazing-seo-skill/
 
 ## Status
 
-Active development. v0.2 series — calibrated against real production sites,
-all 6 deterministic checkers verified end-to-end. See commit history for
-release notes.
+Active development. v0.7 series — 29 deterministic checkers + 6 orchestrator
+tools, all verified end-to-end on production sites. See [releases](https://github.com/metawhisp/amazing-seo-skill/releases) for changelog.
 
 ## Contributing
 

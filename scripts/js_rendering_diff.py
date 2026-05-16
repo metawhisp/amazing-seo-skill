@@ -58,7 +58,7 @@ try:
 except ImportError:
     print("ERROR: playwright not installed. Run: .venv/bin/pip install playwright && "
           ".venv/bin/playwright install chromium", file=sys.stderr)
-    sys.exit(64)
+    sys.exit(1)
 
 
 from bs4 import BeautifulSoup

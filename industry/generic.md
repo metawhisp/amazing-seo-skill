@@ -1,5 +1,7 @@
-<!-- Updated: 2026-05-15 -->
+<!-- Updated: 2026-05-16 -->
 # Generic Business SEO Strategy Template
+
+> ⚠️ **Google March 2026 Core Update** — first-hand experience now dominant E-E-A-T signal across all niches. Generic compiled content (Wikipedia-style aggregation, content-mill articles) underperforms practitioner-authored content for the same query. See [`references/eeat-framework.md`](../references/eeat-framework.md).
 
 ## Overview
 

@@ -95,7 +95,8 @@ echo "" >&2
 # ── Run ───────────────────────────────────────────────────────────────────
 if [ "$CRAWLER" = "sf" ]; then
   DOMAIN=$(echo "$URL" | sed -E 's|^https?://||; s|/.*||')
-  OUT_DIR="${OUTPUT:-/tmp/sf-crawl/$DOMAIN}"
+  _OUTPUT_BASE="${AMAZING_SEO_OUTPUT_DIR:-$HOME/.amazing-seo-skill/runs}"
+  OUT_DIR="${OUTPUT:-$_OUTPUT_BASE/sf-crawl-$DOMAIN-$(date -u +%Y%m%d-%H%M%S)}"
   mkdir -p "$OUT_DIR"
   timeout 600 "$SF" \
     --crawl "$URL" \
